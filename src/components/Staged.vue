@@ -25,6 +25,7 @@ const forwardedAttrs = computed(() => {
 
 const mergedClass = computed(() => ["stage-item", attrs.class]);
 
+// 把父级传入的行内样式与分批入场顺序合并起来。
 const mergedStyle = computed(() => {
   const orderStyle = { "--stage-order": props.order };
   return attrs.style ? [attrs.style, orderStyle] : orderStyle;

@@ -45,8 +45,7 @@ export const profile = {
   deconstruction: {
     issue: "Issue 02 / Deconstruction",
     title: "把我的能力拆成几条更容易理解的线索。",
-    copy:
-      "将各种能力拆成一套更容易被理解的标签系统。",
+    copy: "将各种能力拆成一套更容易被理解的标签系统。",
     cards: [
       {
         letter: "P",
@@ -95,8 +94,7 @@ export const profile = {
   about: {
     issue: "Issue 03 / About Me",
     title: "我更希望别人看到的，不只是我做过什么，还有我是怎么做成的。",
-    copy:
-      "这便是我的工作方式和判断标准。",
+    copy: "这便是我的工作方式和判断标准。",
     portraitLabel: "Profile Portrait / Abstract Placeholder",
     paragraphs: [
       "我目前在寻找更适合长期投入的前端方向机会，尤其是那些既重视产品体验，也重视页面完成度和工程质量的团队或项目。",
@@ -225,8 +223,7 @@ export const profile = {
   projects: {
     issue: "Issue 05 / Selected Chapters",
     title: "项目和经历不是罗列，而是用来证明我的节奏、判断和完成度。",
-    copy:
-      "让别人不只是知道我做过什么，也能更快理解我适合怎样的工作内容。",
+    copy: "让别人不只是知道我做过什么，也能更快理解我适合怎样的工作内容。",
     items: [
       {
         id: "identity-site",
@@ -349,8 +346,7 @@ export const profile = {
   contact: {
     issue: "Issue 06 / Contact",
     title: "如果你觉得我的方向合适，欢迎直接联系我。",
-    copy:
-      "我目前在开放求职状态，也欢迎围绕前端开发、作品集页面、产品展示和创意型网页表达进行交流或合作。",
+    copy: "我目前在开放求职状态，也欢迎围绕前端开发、作品集页面、产品展示和创意型网页表达进行交流或合作。",
     display: "LET'S BUILD SOMETHING CLEAR, STRIKING, AND USEFUL.",
     intro:
       "下面是我目前常用的联系方式。如果你有合适的岗位、项目或合作想法，可以直接发邮件，或者先通过微信和 GitHub 找到我。",
