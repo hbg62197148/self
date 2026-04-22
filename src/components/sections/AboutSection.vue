@@ -1,8 +1,9 @@
 <script setup>
+import { nextTick, onBeforeUnmount, ref } from "vue";
 import SectionHeading from "../SectionHeading.vue";
 import Staged from "../Staged.vue";
 
-const props = defineProps({
+defineProps({
   about: {
     type: Object,
     required: true
@@ -18,11 +19,39 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["update:activeQuestion"]);
+const isSpiderDropping = ref(false);
+const spiderDropDuration = 2750;
 
-// 切换问答内容时，不直接修改原始问题数组。
+let spiderResetTimer = 0;
+
+// 切换问答内容时，仍由父组件统一维护当前激活的问题。
 const selectQuestion = (question) => {
   emit("update:activeQuestion", question);
 };
+
+// 点击蜘蛛后触发一次顺滑的吐丝下落动画。
+const triggerSpiderDrop = async () => {
+  if (spiderResetTimer) {
+    window.clearTimeout(spiderResetTimer);
+  }
+
+  if (isSpiderDropping.value) {
+    isSpiderDropping.value = false;
+    await nextTick();
+  }
+
+  isSpiderDropping.value = true;
+
+  spiderResetTimer = window.setTimeout(() => {
+    isSpiderDropping.value = false;
+  }, spiderDropDuration);
+};
+
+onBeforeUnmount(() => {
+  if (spiderResetTimer) {
+    window.clearTimeout(spiderResetTimer);
+  }
+});
 </script>
 
 <template>
@@ -38,15 +67,23 @@ const selectQuestion = (question) => {
         <Staged class="about-visual stage-subitem" :order="0">
           <span class="mini-label">{{ about.portraitLabel }}</span>
           <div class="about-frame">
-            <div class="about-spider-shell" aria-hidden="true">
-              <img
-                class="about-spider"
-                src="/about-spider.svg"
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+            <button
+              type="button"
+              :class="['about-spider-shell', { 'is-dropping': isSpiderDropping }]"
+              aria-label="点击触发蜘蛛吐丝下落"
+              @click="triggerSpiderDrop"
+            >
+              <span class="about-spider-web" aria-hidden="true" />
+              <span class="about-spider-body" aria-hidden="true">
+                <img
+                  class="about-spider"
+                  src="/about-spider.svg"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+            </button>
             <div class="about-frame-core" />
             <div class="about-frame-outline" />
             <div class="about-frame-cross" />

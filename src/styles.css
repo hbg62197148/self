@@ -966,11 +966,20 @@ button {
   right: 22px;
   top: 18px;
   z-index: 2;
+  --spider-drop-duration: 2.75s;
   width: clamp(78px, 9vw, 118px);
   aspect-ratio: 1 / 1.25;
-  transform-origin: top center;
-  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.26));
-  animation: spider-sway 6.2s ease-in-out infinite;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.about-spider-shell:focus-visible {
+  outline: 1px solid rgba(123, 247, 212, 0.7);
+  outline-offset: 6px;
 }
 
 .about-spider-shell::before {
@@ -979,15 +988,81 @@ button {
   left: 50%;
   top: -46px;
   width: 1px;
-  height: 50px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0));
+  height: 54px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.08) 82%, rgba(255, 255, 255, 0));
+  opacity: 0.76;
+}
+
+.about-spider-shell.is-dropping::before {
+  animation: spider-thread-drop var(--spider-drop-duration) cubic-bezier(0.2, 0.9, 0.18, 1) forwards;
+}
+
+.about-spider-web {
+  position: absolute;
+  left: 50%;
+  top: -46px;
+  width: 58px;
+  height: 156px;
+  transform: translateX(-50%) scaleY(0.24);
+  transform-origin: top center;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.14) 82%, rgba(255, 255, 255, 0)) center top / 1px 100% no-repeat;
+}
+
+.about-spider-web::before,
+.about-spider-web::after {
+  content: "";
+  position: absolute;
+  top: 26px;
+  width: 25px;
+  height: 54px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-left: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 100% 0 0 0;
+}
+
+.about-spider-web::before {
+  left: 5px;
+  transform: rotate(-18deg);
+  transform-origin: top right;
+}
+
+.about-spider-web::after {
+  right: 5px;
+  transform: scaleX(-1) rotate(-18deg);
+  transform-origin: top left;
+}
+
+.about-spider-shell.is-dropping .about-spider-web {
+  animation: spider-web-cast var(--spider-drop-duration) cubic-bezier(0.2, 0.9, 0.18, 1) forwards;
+}
+
+.about-spider-body {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: top center;
+  will-change: transform;
+  backface-visibility: hidden;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.3));
+  animation: spider-sway 6.2s ease-in-out infinite;
+}
+
+.about-spider-shell.is-dropping .about-spider-body {
+  animation: spider-drop-cycle var(--spider-drop-duration) cubic-bezier(0.2, 0.9, 0.18, 1) forwards;
 }
 
 .about-spider {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  opacity: 0.96;
+  opacity: 0.98;
+  pointer-events: none;
+  user-select: none;
 }
 
 .about-frame-core {
@@ -1794,6 +1869,98 @@ button {
   }
 }
 
+@keyframes spider-drop-cycle {
+  0% {
+    transform: rotate(-4deg) translate3d(0, 0, 0);
+  }
+
+  12% {
+    transform: rotate(-3deg) translate3d(0, 10px, 0);
+  }
+
+  28% {
+    transform: rotate(-1deg) translate3d(0, 42px, 0);
+  }
+
+  46% {
+    transform: rotate(1.2deg) translate3d(0, 84px, 0);
+  }
+
+  60% {
+    transform: rotate(1.8deg) translate3d(0, 104px, 0);
+  }
+
+  74% {
+    transform: rotate(1deg) translate3d(0, 104px, 0);
+  }
+
+  88% {
+    transform: rotate(-1.5deg) translate3d(0, 38px, 0);
+  }
+
+  100% {
+    transform: rotate(-4deg) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes spider-thread-drop {
+  0% {
+    height: 54px;
+    opacity: 0.76;
+  }
+
+  24% {
+    height: 96px;
+    opacity: 0.88;
+  }
+
+  52% {
+    height: 148px;
+    opacity: 0.92;
+  }
+
+  72% {
+    height: 162px;
+    opacity: 1;
+  }
+
+  100% {
+    height: 54px;
+    opacity: 0.76;
+  }
+}
+
+@keyframes spider-web-cast {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.24);
+  }
+
+  16% {
+    opacity: 0.78;
+  }
+
+  48% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1.04);
+  }
+
+  72% {
+    opacity: 0.92;
+    transform: translateX(-50%) scaleY(1.08);
+  }
+
+  86% {
+    opacity: 0.68;
+    transform: translateX(-50%) scaleY(0.78);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.34);
+  }
+}
+
 @keyframes content-swap {
   from {
     opacity: 0;
@@ -1933,7 +2100,20 @@ button {
 
   .about-spider-shell::before {
     top: -36px;
-    height: 40px;
+    height: 42px;
+  }
+
+  .about-spider-web {
+    top: -36px;
+    width: 50px;
+    height: 128px;
+  }
+
+  .about-spider-web::before,
+  .about-spider-web::after {
+    top: 22px;
+    width: 20px;
+    height: 46px;
   }
 
   .chapter-beacon {
