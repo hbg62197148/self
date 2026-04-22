@@ -1,8 +1,5 @@
-const PROFILE_ENDPOINT = "/api/profile";
-
 async function requestJson(url, options = {}) {
   const response = await fetch(url, {
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(options.headers ?? {})
@@ -20,24 +17,26 @@ async function requestJson(url, options = {}) {
       // 接口没有返回 JSON 时，保留默认错误文案即可。
     }
 
-    const error = new Error(errorMessage);
-    error.status = response.status;
-    throw error;
+    throw new Error(errorMessage);
   }
 
   return response.json();
 }
 
-export async function fetchProfile() {
-  const payload = await requestJson(PROFILE_ENDPOINT);
-  return payload.data;
-}
-
-export async function saveProfile(profile) {
-  const payload = await requestJson(PROFILE_ENDPOINT, {
-    method: "PUT",
-    body: JSON.stringify(profile)
+export async function createContactChallenge(label) {
+  const payload = await requestJson("/api/contact/challenge", {
+    method: "POST",
+    body: JSON.stringify({ label })
   });
 
   return payload.data;
+}
+
+export async function verifyProtectedContact(payload) {
+  const response = await requestJson("/api/contact/access", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+
+  return response.data;
 }

@@ -1,16 +1,20 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 import AdminAboutEditor from "../components/admin/AdminAboutEditor.vue";
 import AdminContactEditor from "../components/admin/AdminContactEditor.vue";
 import AdminHeroEditor from "../components/admin/AdminHeroEditor.vue";
 import AdminIdentityEditor from "../components/admin/AdminIdentityEditor.vue";
+import AdminLoginForm from "../components/admin/AdminLoginForm.vue";
 import AdminPanel from "../components/admin/AdminPanel.vue";
 import AdminProjectsEditor from "../components/admin/AdminProjectsEditor.vue";
 import AdminQuestionsEditor from "../components/admin/AdminQuestionsEditor.vue";
 import AdminSkillsEditor from "../components/admin/AdminSkillsEditor.vue";
+import AdminValidationSummary from "../components/admin/AdminValidationSummary.vue";
 import { useProfileContent } from "../composables/useProfileContent";
+import { fetchAdminSession, loginAdmin, logoutAdmin } from "../services/adminAuthApi";
 import { saveProfile } from "../services/profileApi";
+import { validateProfileDraft } from "../utils/profileValidation";
 
 const cloneContent = (value) => JSON.parse(JSON.stringify(value));
 
@@ -27,8 +31,13 @@ const sectionLinks = [
 const { profile, loading, loadProfile } = useProfileContent();
 const draft = ref(cloneContent(profile.value));
 const saving = ref(false);
+const loggingIn = ref(false);
+const checkingSession = ref(true);
+const isAuthenticated = ref(false);
+const authMessage = ref("");
 const saveState = ref("idle");
 const saveMessage = ref("");
+const validationErrors = ref([]);
 
 watch(
   profile,
@@ -50,13 +59,62 @@ const updatedAt = computed(() => {
   });
 });
 
+const ensureAdminSession = async () => {
+  checkingSession.value = true;
+
+  try {
+    await fetchAdminSession();
+    isAuthenticated.value = true;
+    authMessage.value = "";
+  } catch {
+    isAuthenticated.value = false;
+  } finally {
+    checkingSession.value = false;
+  }
+};
+
+const submitLogin = async (credentials) => {
+  loggingIn.value = true;
+  authMessage.value = "";
+
+  try {
+    await loginAdmin(credentials);
+    isAuthenticated.value = true;
+    await loadProfile();
+  } catch (error) {
+    authMessage.value = error instanceof Error ? error.message : "登录失败，请稍后重试。";
+    isAuthenticated.value = false;
+  } finally {
+    loggingIn.value = false;
+  }
+};
+
+const submitLogout = async () => {
+  await logoutAdmin();
+  isAuthenticated.value = false;
+  authMessage.value = "";
+  saveMessage.value = "";
+  saveState.value = "idle";
+  validationErrors.value = [];
+};
+
 const resetDraft = () => {
   draft.value = cloneContent(profile.value);
   saveState.value = "idle";
   saveMessage.value = "";
+  validationErrors.value = [];
 };
 
 const publishContent = async () => {
+  const nextValidationErrors = validateProfileDraft(draft.value);
+  validationErrors.value = nextValidationErrors;
+
+  if (nextValidationErrors.length > 0) {
+    saveState.value = "error";
+    saveMessage.value = `还有 ${nextValidationErrors.length} 处内容需要修正后才能发布。`;
+    return;
+  }
+
   saving.value = true;
   saveState.value = "idle";
   saveMessage.value = "";
@@ -67,18 +125,44 @@ const publishContent = async () => {
     draft.value = cloneContent(savedProfile);
     saveState.value = "success";
     saveMessage.value = "内容已发布，前台会自动读取最新版本。";
+    validationErrors.value = [];
   } catch (error) {
     saveState.value = "error";
     saveMessage.value = error instanceof Error ? error.message : "保存失败，请稍后重试。";
+
+    if (error instanceof Error && error.status === 401) {
+      isAuthenticated.value = false;
+      authMessage.value = "登录状态已失效，请重新登录后台。";
+    }
   } finally {
     saving.value = false;
   }
 };
+
+onMounted(() => {
+  // 后台页面打开时先确认登录状态，未登录则只显示登录入口。
+  ensureAdminSession();
+});
 </script>
 
 <template>
   <div class="admin-page">
-    <div class="admin-shell">
+    <div v-if="checkingSession" class="admin-auth-shell">
+      <article class="admin-login-card panel">
+        <p class="admin-kicker">Content Admin</p>
+        <h1>检查登录状态中...</h1>
+        <p class="admin-subtitle">正在确认你是否已经登录后台。</p>
+      </article>
+    </div>
+
+    <AdminLoginForm
+      v-else-if="!isAuthenticated"
+      :submitting="loggingIn"
+      :error-message="authMessage"
+      @submit="submitLogin"
+    />
+
+    <div v-else class="admin-shell">
       <header class="admin-header panel">
         <div>
           <p class="admin-kicker">Content Admin</p>
@@ -102,6 +186,9 @@ const publishContent = async () => {
             <button type="button" class="button button-primary" :disabled="loading || saving" @click="publishContent">
               {{ saving ? "发布中..." : "发布内容" }}
             </button>
+            <button type="button" class="button button-secondary" @click="submitLogout">
+              退出登录
+            </button>
             <RouterLink class="button button-secondary" to="/">返回前台</RouterLink>
           </div>
         </div>
@@ -110,6 +197,8 @@ const publishContent = async () => {
       <p v-if="saveMessage" class="admin-feedback" :class="[`is-${saveState}`]">
         {{ saveMessage }}
       </p>
+
+      <AdminValidationSummary :errors="validationErrors" />
 
       <div class="admin-layout">
         <aside class="admin-sidebar panel-inset">

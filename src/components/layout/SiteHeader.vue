@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from "vue-router";
+
 defineProps({
   navItems: {
     type: Array,
@@ -31,6 +33,10 @@ defineProps({
       >
         {{ item.label }}
       </a>
+
+      <RouterLink class="nav-link" to="/admin">
+        后台
+      </RouterLink>
     </nav>
   </header>
 </template>

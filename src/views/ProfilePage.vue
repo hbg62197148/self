@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
+import ContactCaptchaDialog from "../components/contact/ContactCaptchaDialog.vue";
 import ChapterBeacon from "../components/layout/ChapterBeacon.vue";
 import LoadingScreen from "../components/layout/LoadingScreen.vue";
 import SiteFooter from "../components/layout/SiteFooter.vue";
@@ -15,6 +16,7 @@ import { useClipboard } from "../composables/useClipboard";
 import { useLoadingGate } from "../composables/useLoadingGate";
 import { usePointerGlow } from "../composables/usePointerGlow";
 import { useProfileContent } from "../composables/useProfileContent";
+import { useProtectedContactAction } from "../composables/useProtectedContactAction";
 import { useRevealOnScroll } from "../composables/useRevealOnScroll";
 
 const navItems = [
@@ -78,6 +80,27 @@ const { loading: introLoading } = useLoadingGate();
 const { activeSection } = useActiveSection();
 const { copiedLabel, copyToClipboard } = useClipboard();
 const { profile, loading: profileLoading } = useProfileContent({ pollMs: 30000 });
+const {
+  visible: contactGuardVisible,
+  challengePrompt,
+  pendingItem,
+  submitting: guardSubmitting,
+  errorMessage: guardErrorMessage,
+  openDialog: openProtectedContactDialog,
+  submitAnswer: submitProtectedContactAnswer,
+  refreshChallenge: refreshProtectedContactChallenge,
+  closeDialog: closeProtectedContactDialog
+} = useProtectedContactAction(async (item) => {
+  // 验证通过后，再执行真正的复制或发送动作。
+  if (item.copy) {
+    await copyToClipboard(item.value, item.label);
+    return;
+  }
+
+  if (item.href) {
+    window.location.href = item.href;
+  }
+});
 
 // 根据当前章节切换整页氛围色。
 const activeMeta = computed(() => sectionMeta[activeSection.value] ?? sectionMeta.home);
@@ -147,9 +170,21 @@ usePointerGlow();
         :contact="profile.contact"
         :copied-label="copiedLabel"
         @copy="copyToClipboard"
+        @protected-action="openProtectedContactDialog"
       />
     </main>
 
     <SiteFooter :current-year="currentYear" />
+
+    <ContactCaptchaDialog
+      :visible="contactGuardVisible"
+      :challenge-prompt="challengePrompt"
+      :pending-item="pendingItem"
+      :submitting="guardSubmitting"
+      :error-message="guardErrorMessage"
+      @close="closeProtectedContactDialog"
+      @submit="submitProtectedContactAnswer"
+      @refresh="refreshProtectedContactChallenge"
+    />
   </div>
 </template>

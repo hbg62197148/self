@@ -356,13 +356,15 @@ export const defaultProfile = {
         label: "Email",
         value: "hbg62197148@gmail.com",
         href: "mailto:hbg62197148@gmail.com",
-        action: "Send Mail"
+        action: "Send Mail",
+        protected: true
       },
       {
         label: "WeChat",
         value: "15013145909",
         action: "Copy ID",
-        copy: true
+        copy: true,
+        protected: true
       },
       {
         label: "GitHub",

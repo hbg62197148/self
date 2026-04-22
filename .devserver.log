@@ -15,3 +15,16 @@
 [1]   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m459[22m[2m[0m ms[22m
 [1] 
 [1]   [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5173[22m/[39m
+[1] [2m17:19:42[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/AdminPage.vue, /src/views/ProfilePage.vue[22m
+[1] [2m17:19:42[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/SiteHeader.vue[22m
+[0] Restarting 'server/index.js'
+[0] Content server is running at http://127.0.0.1:3001
+[1] [2m17:21:39[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/AdminPage.vue[22m
+[1] [2m17:22:00[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles.css[22m
+[0] Failed running 'server/index.js'. Waiting for file changes before restarting...
+[1] ^C
+[0] ^C
+[1] ^C��ֹ������������(Y/N)? 
+[0] ^C��ֹ������������(Y/N)? 
+[1] npm run dev:client exited with code 3221225786
+[0] npm run dev:server exited with code 3221225786

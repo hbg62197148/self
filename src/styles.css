@@ -1360,6 +1360,91 @@ button {
   padding: 18px 0 28px;
 }
 
+.contact-guard-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(10px);
+}
+
+.contact-guard-card {
+  width: min(540px, calc(100vw - 24px));
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 5vw, 32px);
+}
+
+.contact-guard-head {
+  display: grid;
+  gap: 10px;
+}
+
+.contact-guard-head h2 {
+  margin: 0;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 0.96;
+}
+
+.contact-guard-challenge {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.contact-guard-challenge span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.contact-guard-challenge strong {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 0.92;
+}
+
+.admin-auth-shell {
+  width: min(680px, calc(100vw - 20px));
+  margin: 0 auto;
+  min-height: calc(100vh - 46px);
+  display: grid;
+  place-items: center;
+}
+
+.admin-login-card {
+  width: 100%;
+  display: grid;
+  gap: 20px;
+  padding: clamp(24px, 5vw, 36px);
+}
+
+.admin-login-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-login-copy h1,
+.admin-login-card h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  line-height: 0.94;
+}
+
+.admin-login-form {
+  display: grid;
+  gap: 16px;
+}
+
 .admin-shell {
   width: var(--content-width);
   margin: 0 auto;
@@ -1492,6 +1577,43 @@ button {
 .admin-panel {
   padding: 24px;
   scroll-margin-top: 22px;
+}
+
+.admin-validation {
+  padding: 20px;
+  border-color: rgba(255, 106, 61, 0.24);
+}
+
+.admin-validation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-validation-link {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.admin-validation-link:hover {
+  border-color: rgba(255, 106, 61, 0.28);
+  background: rgba(255, 106, 61, 0.08);
+  transform: translateY(-1px);
+}
+
+.admin-validation-link strong {
+  font-size: 0.84rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-validation-link span {
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .admin-panel-head {
@@ -1725,6 +1847,7 @@ button {
     padding-top: 10px;
   }
 
+  .admin-auth-shell,
   .admin-shell {
     width: min(100vw - 18px, 1280px);
   }

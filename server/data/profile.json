@@ -388,13 +388,15 @@
         "label": "Email",
         "value": "hbg62197148@gmail.com",
         "href": "mailto:hbg62197148@gmail.com",
-        "action": "Send Mail"
+        "action": "Send Mail",
+        "protected": true
       },
       {
         "label": "WeChat",
         "value": "15013145909",
         "action": "Copy ID",
-        "copy": true
+        "copy": true,
+        "protected": true
       },
       {
         "label": "GitHub",
@@ -405,6 +407,6 @@
     ]
   },
   "meta": {
-    "updatedAt": "2026-04-22T09:04:07.773Z"
+    "updatedAt": "2026-04-22T09:23:04.747Z"
   }
 }
