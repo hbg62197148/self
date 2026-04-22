@@ -213,7 +213,7 @@ export const profile = {
       {
         title: "Build Layer",
         note: "可运行的前端项目，兼顾组件拆分、交互状态和响应式适配。",
-        items: ["React", "Vite", "组件拆分", "交互状态", "响应式适配"]
+        items: ["Vue", "Vite", "组件拆分", "交互状态", "响应式适配"]
       },
       {
         title: "Delivery Layer",
@@ -247,10 +247,10 @@ export const profile = {
           },
           {
             label: "Build",
-            value: "Vite + React"
+            value: "Vite + Vue"
           }
         ],
-        stack: ["React", "Vite", "CSS", "Interaction Design"],
+        stack: ["Vue", "Vite", "CSS", "Interaction Design"],
         details: [
           "重新组织首页、身份拆解、问答区和联系区，让阅读节奏更清楚。",
           "通过分批入场、章节切换和信息卡片提升页面的完成度与记忆点。",
