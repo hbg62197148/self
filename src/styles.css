@@ -1119,8 +1119,8 @@ button {
 
 .universe-core {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: 40%;
+  top: 35%;
   width: min(260px, 48vw);
   transform: translate(-50%, -50%);
   padding: 24px;

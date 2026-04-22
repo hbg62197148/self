@@ -467,7 +467,7 @@ function App() {
                   key={node.label}
                   className="universe-node stage-subitem"
                   style={{
-                    "--x": node.x,
+                    "--x": node.label === "Motion" ? "35%" : node.x,
                     "--y": node.y,
                     "--tone": node.tone,
                     "--stage-order": 4 + index
