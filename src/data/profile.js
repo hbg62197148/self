@@ -1,4 +1,5 @@
-export const profile = {
+// 这里只保留内容模板，真正的展示内容改由后台接口读写。
+export const defaultProfile = {
   edition: "PERSONAL ISSUE",
   nameCn: "黄彬格",
   nameEn: "Huang Binge",
@@ -372,3 +373,5 @@ export const profile = {
     ]
   }
 };
+
+export const profile = defaultProfile;
