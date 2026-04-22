@@ -1,0 +1,49 @@
+<svg width="160" height="200" viewBox="0 0 160 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="abdomenGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(84 116) rotate(90) scale(56 48)">
+      <stop offset="0" stop-color="#FF8D61"/>
+      <stop offset="0.42" stop-color="#FF6A3D"/>
+      <stop offset="1" stop-color="#8A2F1C"/>
+    </radialGradient>
+    <radialGradient id="thoraxGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(82 84) rotate(90) scale(24 22)">
+      <stop offset="0" stop-color="#8BF6D9"/>
+      <stop offset="1" stop-color="#1A655B"/>
+    </radialGradient>
+    <linearGradient id="legTone" x1="24" y1="50" x2="136" y2="154" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5EFE8"/>
+      <stop offset="1" stop-color="#8A837C"/>
+    </linearGradient>
+    <filter id="softBlur" x="0" y="0" width="160" height="200" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="84" cy="117" rx="38" ry="42" fill="url(#abdomenGlow)"/>
+  <ellipse cx="82" cy="83" rx="18" ry="20" fill="url(#thoraxGlow)"/>
+  <circle cx="77" cy="77" r="3.2" fill="#0A0A0A"/>
+  <circle cx="89" cy="77" r="3.2" fill="#0A0A0A"/>
+
+  <g opacity="0.32" filter="url(#softBlur)">
+    <ellipse cx="86" cy="118" rx="34" ry="28" fill="#FF6A3D"/>
+  </g>
+
+  <g stroke="url(#legTone)" stroke-width="4.2" stroke-linecap="round">
+    <path d="M71 88C58 76 43 64 25 52"/>
+    <path d="M68 99C52 92 34 84 15 73"/>
+    <path d="M66 113C50 114 34 118 18 128"/>
+    <path d="M69 126C54 134 42 146 30 160"/>
+
+    <path d="M93 88C106 76 121 64 139 52"/>
+    <path d="M96 99C112 92 130 84 145 73"/>
+    <path d="M98 113C114 114 130 118 142 128"/>
+    <path d="M95 126C110 134 122 146 130 160"/>
+  </g>
+
+  <g stroke="#FFF7EF" stroke-width="1.6" stroke-linecap="round" opacity="0.88">
+    <path d="M80 65L80 45"/>
+    <path d="M76 68L69 55"/>
+    <path d="M84 68L91 55"/>
+  </g>
+
+  <ellipse cx="92" cy="103" rx="11" ry="9" fill="#FFE1D5" opacity="0.3"/>
+</svg>

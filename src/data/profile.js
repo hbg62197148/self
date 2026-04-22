@@ -1,0 +1,378 @@
+export const profile = {
+  edition: "PERSONAL ISSUE",
+  nameCn: "黄彬格",
+  nameEn: "Huang Binge",
+  role: "Frontend Developer / Design-minded Builder",
+  hero: {
+    issue: "Issue 01 / Personal Signal",
+    eyebrow: "A profile page that turns resume content into a clearer, more memorable reading experience.",
+    title: ["PERSONAL", "SIGNAL", "SYSTEM"],
+    subtitle:
+      "把表达做得更有记忆点，把信息做得更有秩序，把联系做得更直接，让个人主页更像一个真正可进入的职业入口。",
+    primaryCta: {
+      label: "我的标签",
+      href: "#identity"
+    },
+    secondaryCta: {
+      label: "直接联系",
+      href: "#contact"
+    },
+    pulse: "Open to full-time opportunities",
+    summary:
+      "目前正在寻找更合适的全职机会，方向偏前端开发与体验实现，也愿意和有想法、有完成度要求的团队一起做长期投入的产品。",
+    stats: [
+      {
+        label: "Base",
+        value: "Guangzhou, China"
+      },
+      {
+        label: "Open To",
+        value: "Full-time, selected collaborations"
+      },
+      {
+        label: "Response",
+        value: "Usually within 24 hours"
+      }
+    ],
+    tags: [
+      "Identity Design",
+      "Creative Coding",
+      "Narrative Layout",
+      "Portfolio Strategy",
+      "Frontend Systems"
+    ]
+  },
+  deconstruction: {
+    issue: "Issue 02 / Deconstruction",
+    title: "把我的能力拆成几条更容易理解的线索。",
+    copy:
+      "将各种能力拆成一套更容易被理解的标签系统。",
+    cards: [
+      {
+        letter: "P",
+        word: "Presence",
+        zh: "个人定位",
+        text: "我希望页面在第一眼就能传达出清晰的个人气质，让人知道我适合做什么、擅长什么。"
+      },
+      {
+        letter: "R",
+        word: "Range",
+        zh: "能力范围",
+        text: "我的能力覆盖信息整理、页面表达、交互细节和前端实现，能够把想法一路推进到可交付状态。"
+      },
+      {
+        letter: "O",
+        word: "Output",
+        zh: "输出能力",
+        text: "我更在意真正能落地的结果，而不是停留在概念层，所以会把页面做成可运行、可维护的完整成品。"
+      },
+      {
+        letter: "F",
+        word: "Focus",
+        zh: "关注重点",
+        text: "我会优先处理信息层级、阅读路径和重点表达，让页面既好理解，也更容易留下印象。"
+      },
+      {
+        letter: "I",
+        word: "Instinct",
+        zh: "视觉判断",
+        text: "我喜欢有明确个性的页面，但不会为了装饰而装饰，风格应该服务内容和目标。"
+      },
+      {
+        letter: "L",
+        word: "Link",
+        zh: "协作方式",
+        text: "我习惯先对齐目标和边界，再快速推进细节，用更清楚的沟通减少来回成本。"
+      },
+      {
+        letter: "E",
+        word: "Evolution",
+        zh: "持续进化",
+        text: "我会把个人站和项目页面都当成可持续维护的系统，而不是一次性展示物。"
+      }
+    ]
+  },
+  about: {
+    issue: "Issue 03 / About Me",
+    title: "我更希望别人看到的，不只是我做过什么，还有我是怎么做成的。",
+    copy:
+      "这便是我的工作方式和判断标准。",
+    portraitLabel: "Profile Portrait / Abstract Placeholder",
+    paragraphs: [
+      "我目前在寻找更适合长期投入的前端方向机会，尤其是那些既重视产品体验，也重视页面完成度和工程质量的团队或项目。",
+      "我擅长把信息结构、视觉表达和前端实现放到同一条链路里思考，让页面不仅有风格，也真正可用、可维护、可持续扩展。"
+    ],
+    snippets: [
+      "前端实现与体验并重",
+      "结构、视觉、落地一体化",
+      "正在寻找合适的全职机会"
+    ],
+    quickFacts: [
+      {
+        label: "Work Mode",
+        value: "Full-time / Remote / Fast iteration"
+      },
+      {
+        label: "Preferred Scope",
+        value: "前端页面、作品集站、产品展示页"
+      },
+      {
+        label: "Current Theme",
+        value: "正在求职，关注前端与体验实现方向"
+      }
+    ]
+  },
+  questions: [
+    {
+      id: "what",
+      prompt: "你最适合做什么类型的项目？",
+      answer:
+        "我比较适合做既要表达清楚、又要真正落地的项目，比如个人品牌站、作品集站、产品展示页，以及偏体验和视觉表现的前端页面。对我来说，好的页面不只是能看，还要能上线、能维护、能传达价值。"
+    },
+    {
+      id: "how",
+      prompt: "你的工作方式是什么？",
+      answer:
+        "我的工作方式通常是先确定信息层级和页面骨架，再决定视觉语言和交互节奏，最后把细节与实现打磨完整。这样能保证页面既有清晰结构，也有比较高的完成度，而不是只停留在概念层。"
+    },
+    {
+      id: "why",
+      prompt: "你最在意页面的哪件事？",
+      answer:
+        "我最在意的是页面有没有把这个人或这个产品真正的气质传达出来。如果打开之后只剩下模板感，说明它还没有完成最关键的任务。对我来说，结构清楚和风格准确，应该同时成立。"
+    },
+    {
+      id: "next",
+      prompt: "这页后续还能怎么扩展？",
+      answer:
+        "这页后面还可以继续扩展成更完整的个人站，比如加入项目详情页、文章模块、求职信息、英文版，或者接入更方便维护的内容配置。现在这一版先把首页的身份表达和核心信息入口搭起来，后续延展空间是足够的。"
+    }
+  ],
+  skills: {
+    issue: "Issue 04 / Skill Universe",
+    title: "把技能看成一套协同工作的系统，而不是一串孤立的名词。",
+    copy:
+      "我更关注能力之间如何配合，而不是单点技能本身。结构、视觉、交互和前端实现组合在一起，才是我真正的优势。",
+    core: "Structure x Visual x Frontend",
+    coreNote: "我更擅长把页面从概念推进到可落地状态，让内容表达和实现质量一起成立。",
+    nodes: [
+      {
+        label: "Product",
+        detail: "Structure",
+        x: "50%",
+        y: "12%",
+        tone: "#ff6a3d"
+      },
+      {
+        label: "Visual",
+        detail: "Atmosphere",
+        x: "84%",
+        y: "28%",
+        tone: "#7bf7d4"
+      },
+      {
+        label: "Frontend",
+        detail: "Execution",
+        x: "84%",
+        y: "72%",
+        tone: "#9ea9ff"
+      },
+      {
+        label: "Motion",
+        detail: "Rhythm",
+        x: "50%",
+        y: "88%",
+        tone: "#f6c85f"
+      },
+      {
+        label: "Content",
+        detail: "Story",
+        x: "16%",
+        y: "72%",
+        tone: "#ff8cb7"
+      },
+      {
+        label: "Systems",
+        detail: "Scalability",
+        x: "16%",
+        y: "28%",
+        tone: "#69d2ff"
+      }
+    ],
+    groups: [
+      {
+        title: "Narrative Layer",
+        note: "把设计路线组织成更容易被理解的叙事结构。",
+        items: ["栏目结构", "文案组织", "信息层级", "阅读节奏", "个人表达"]
+      },
+      {
+        title: "Visual Layer",
+        note: "建立更明确的页面气质，而不是落回模板感。",
+        items: ["版式系统", "视觉氛围", "字体选择", "信息对比", "风格统一"]
+      },
+      {
+        title: "Build Layer",
+        note: "可运行的前端项目，兼顾组件拆分、交互状态和响应式适配。",
+        items: ["React", "Vite", "组件拆分", "交互状态", "响应式适配"]
+      },
+      {
+        title: "Delivery Layer",
+        note: "页面易于替换内容、扩展模块和持续迭代，不是一次性展示品。",
+        items: ["数据配置", "模块复用", "维护成本", "内容替换", "持续更新"]
+      }
+    ]
+  },
+  projects: {
+    issue: "Issue 05 / Selected Chapters",
+    title: "项目和经历不是罗列，而是用来证明我的节奏、判断和完成度。",
+    copy:
+      "让别人不只是知道我做过什么，也能更快理解我适合怎样的工作内容。",
+    items: [
+      {
+        id: "identity-site",
+        index: "01",
+        category: "Personal Branding",
+        title: "个人主页重构",
+        subtitle: "把普通简介页升级成更有识别度的线上身份入口",
+        description:
+          "用更清楚的结构、更稳定的风格和更完整的实现，把个人介绍整理成一套真正能被阅读的入口。",
+        signals: [
+          {
+            label: "Structure",
+            value: "Editorial single-page"
+          },
+          {
+            label: "Tone",
+            value: "Bold + structured"
+          },
+          {
+            label: "Build",
+            value: "Vite + React"
+          }
+        ],
+        stack: ["React", "Vite", "CSS", "Interaction Design"],
+        details: [
+          "重新组织首页、身份拆解、问答区和联系区，让阅读节奏更清楚。",
+          "通过分批入场、章节切换和信息卡片提升页面的完成度与记忆点。",
+          "把内容单独抽到数据层，后续替换个人资料更轻松。"
+        ]
+      },
+      {
+        id: "portfolio-system",
+        index: "02",
+        category: "Portfolio Strategy",
+        title: "作品集结构整理",
+        subtitle: "让项目展示更有主次，而不是简单地平铺罗列",
+        description:
+          "作品集最重要的不是展示数量，而是展示判断。通过更合理的排序和叙事结构，可以让重点项目更容易被看见。",
+        signals: [
+          {
+            label: "Goal",
+            value: "Clearer project reading"
+          },
+          {
+            label: "Focus",
+            value: "Memory + hierarchy"
+          },
+          {
+            label: "Result",
+            value: "More convincing presentation"
+          }
+        ],
+        stack: ["Content Design", "Information Architecture", "Visual System"],
+        details: [
+          "让项目的顺序和层级服务于你想传达的职业方向。",
+          "通过标题、标签和摘要帮助访客更快进入重点。",
+          "让页面既适合快速扫读，也能承载更深入的了解。"
+        ]
+      },
+      {
+        id: "launch-page",
+        index: "03",
+        category: "Product Launch",
+        title: "产品展示页表达",
+        subtitle: "把产品信息整理成更有节奏和重点的页面",
+        description:
+          "兼顾信息密度和视觉节奏，让用户不只是看见内容，还能更顺畅地理解重点与价值。",
+        signals: [
+          {
+            label: "Approach",
+            value: "Story-driven layout"
+          },
+          {
+            label: "Visual",
+            value: "High contrast editorial"
+          },
+          {
+            label: "Outcome",
+            value: "Clearer product message"
+          }
+        ],
+        stack: ["Landing Page", "Frontend", "Narrative Design"],
+        details: [
+          "先建立用户理解路径，再安排页面区块和表达顺序。",
+          "通过视觉对比和交互节奏控制阅读体验。",
+          "适合需要兼顾展示效果和信息效率的场景。"
+        ]
+      },
+      {
+        id: "creative-collab",
+        index: "04",
+        category: "Creative Collaboration",
+        title: "表达型前端页面",
+        subtitle: "当页面本身也需要成为作品的一部分",
+        description:
+          "有些项目不适合只做成标准模板，它们需要更强的风格、更明确的叙事和更有层次的视觉节奏来承载内容。",
+        signals: [
+          {
+            label: "Character",
+            value: "Distinctive and expressive"
+          },
+          {
+            label: "Interaction",
+            value: "Motion + layered cards"
+          },
+          {
+            label: "Audience",
+            value: "Creative and product teams"
+          }
+        ],
+        stack: ["Creative Direction", "Web Styling", "Narrative UX"],
+        details: [
+          "让页面不只是信息容器，也能体现项目本身的气质。",
+          "通过版式、动效和装饰元素建立更强的记忆点。",
+          "适合既重视表达、又要求落地质量的场景。"
+        ]
+      }
+    ]
+  },
+  contact: {
+    issue: "Issue 06 / Contact",
+    title: "如果你觉得我的方向合适，欢迎直接联系我。",
+    copy:
+      "我目前在开放求职状态，也欢迎围绕前端开发、作品集页面、产品展示和创意型网页表达进行交流或合作。",
+    display: "LET'S BUILD SOMETHING CLEAR, STRIKING, AND USEFUL.",
+    intro:
+      "下面是我目前常用的联系方式。如果你有合适的岗位、项目或合作想法，可以直接发邮件，或者先通过微信和 GitHub 找到我。",
+    items: [
+      {
+        label: "Email",
+        value: "hbg62197148@gmail.com",
+        href: "mailto:hbg62197148@gmail.com",
+        action: "Send Mail"
+      },
+      {
+        label: "WeChat",
+        value: "15013145909",
+        action: "Copy ID",
+        copy: true
+      },
+      {
+        label: "GitHub",
+        value: "github.com/hbg62197148",
+        href: "https://github.com/hbg62197148",
+        action: "Open GitHub"
+      }
+    ]
+  }
+};
