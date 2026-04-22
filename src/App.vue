@@ -222,11 +222,11 @@ onBeforeUnmount(() => {
         <span class="brand-mark">PI</span>
         <span class="brand-copy">
           <strong>Personal Issue</strong>
-          <small>涓汉涓撳垔</small>
+          <small>个人专刊</small>
         </span>
       </a>
 
-      <nav class="site-nav" aria-label="椤甸潰瀵艰埅">
+      <nav class="site-nav" aria-label="页面导航">
         <a
           v-for="item in navItems"
           :key="item.id"
@@ -606,7 +606,7 @@ onBeforeUnmount(() => {
     </main>
 
     <footer class="site-footer">
-      <span>Personal Issue | 涓汉涓撳垔 | Huang Binge</span>
+      <span>Personal Issue | 个人专刊 | Huang Binge</span>
       <span>{{ currentYear }}</span>
     </footer>
   </div>
