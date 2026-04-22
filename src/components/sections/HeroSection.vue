@@ -1,5 +1,6 @@
 <script setup>
 import Staged from "../Staged.vue";
+import { useBouncingDisc } from "../../composables/useBouncingDisc";
 
 defineProps({
   hero: {
@@ -19,6 +20,9 @@ defineProps({
     default: ""
   }
 });
+
+// 让主视觉圆球在卡片内部缓慢漂移，并在触边时反弹。
+const { portraitCardRef, portraitDiscRef, portraitDiscStyle } = useBouncingDisc();
 </script>
 
 <template>
@@ -66,11 +70,11 @@ defineProps({
 
     <div class="hero-stage">
       <Staged class="portrait-shell" :order="2">
-        <div class="portrait-card">
+        <div ref="portraitCardRef" class="portrait-card">
           <div class="portrait-glow portrait-glow-one" />
           <div class="portrait-glow portrait-glow-two" />
           <div class="portrait-grid" />
-          <div class="portrait-disc" />
+          <div ref="portraitDiscRef" class="portrait-disc" :style="portraitDiscStyle" />
           <div class="portrait-plate">
             <span>{{ nameCn }}</span>
             <strong>{{ nameEn }}</strong>
