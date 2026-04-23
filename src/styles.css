@@ -1499,6 +1499,7 @@ button {
 }
 
 .project-tab {
+  position: relative;
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
   gap: 14px;
@@ -1507,6 +1508,43 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.project-tab::before,
+.project-tab::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.project-tab::before {
+  top: 16px;
+  bottom: 16px;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+  opacity: 0;
+  transform: scaleY(0.18);
+  transform-origin: top center;
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-tab::after {
+  top: -18%;
+  width: 6px;
+  height: 44px;
+  left: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 106, 61, 0.98), rgba(123, 247, 212, 0.74), rgba(255, 255, 255, 0));
+  opacity: 0;
+  filter: blur(0.5px);
+  transform: translateY(0);
 }
 
 .project-tab:hover,
@@ -1514,6 +1552,23 @@ button {
   transform: translateY(-2px);
   border-color: rgba(255, 106, 61, 0.3);
   background: rgba(255, 106, 61, 0.08);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.project-tab.is-active::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.project-tab.is-active::after {
+  opacity: 1;
+  animation: project-tab-flow 2.8s linear infinite;
+}
+
+.project-index,
+.project-tab-copy {
+  position: relative;
+  z-index: 1;
 }
 
 .project-index,
@@ -1542,11 +1597,45 @@ button {
   top: 104px;
   display: grid;
   gap: 18px;
+  min-height: 420px;
+}
+
+.project-detail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 36%),
+    radial-gradient(circle at 100% 0%, rgba(255, 106, 61, 0.1), transparent 28%);
+  pointer-events: none;
 }
 
 .project-detail-swap {
+  position: relative;
   display: grid;
   gap: 18px;
+  height: 100%;
+}
+
+.project-panel-enter-active,
+.project-panel-leave-active {
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-panel-enter-from {
+  opacity: 0;
+  transform: translate3d(26px, 0, 0) scale(0.988);
+  filter: blur(14px);
+}
+
+.project-panel-leave-to {
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0) scale(0.992);
+  filter: blur(10px);
 }
 
 .project-detail-head {
@@ -1558,6 +1647,16 @@ button {
 
 .signal-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.signal-card-project {
+  opacity: 1;
+  transform: none;
+}
+
+.project-panel-enter-active .signal-card-project {
+  animation: project-signal-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(110ms + var(--signal-order, 0) * 90ms);
 }
 
 .detail-list {
@@ -2085,6 +2184,30 @@ button {
   100% {
     transform: translate(-50%, -50%) scale(1);
     box-shadow: 0 0 42px rgba(255, 106, 61, 0.1);
+  }
+}
+
+@keyframes project-tab-flow {
+  from {
+    transform: translateY(-10%);
+  }
+
+  to {
+    transform: translateY(245%);
+  }
+}
+
+@keyframes project-signal-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.985);
+    filter: blur(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
   }
 }
 

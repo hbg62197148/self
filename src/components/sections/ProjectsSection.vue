@@ -20,7 +20,7 @@ const activeProject = computed(
   () => props.projects.items.find((item) => item.id === props.activeProjectId) ?? props.projects.items[0]
 );
 
-// 让左侧项目标签驱动右侧粘性详情面板。
+// 左侧项目标签负责驱动右侧详情面板的切换。
 const selectProject = (projectId) => {
   emit("update:activeProjectId", projectId);
 };
@@ -55,36 +55,43 @@ const selectProject = (projectId) => {
       </div>
 
       <article class="project-detail panel-inset stage-item" :style="{ '--stage-order': 6 }">
-        <div :key="activeProject.id" class="project-detail-swap stage-swap">
-          <div class="project-detail-head">
-            <div>
-              <p class="mini-label">{{ activeProject.category }}</p>
-              <h3>{{ activeProject.title }}</h3>
+        <Transition name="project-panel" mode="out-in">
+          <div :key="activeProject.id" class="project-detail-swap">
+            <div class="project-detail-head">
+              <div>
+                <p class="mini-label">{{ activeProject.category }}</p>
+                <h3>{{ activeProject.title }}</h3>
+              </div>
+              <span class="detail-index">{{ activeProject.index }}</span>
             </div>
-            <span class="detail-index">{{ activeProject.index }}</span>
-          </div>
 
-          <p class="project-description">{{ activeProject.description }}</p>
+            <p class="project-description">{{ activeProject.description }}</p>
 
-          <div class="signal-grid">
-            <article v-for="item in activeProject.signals" :key="item.label" class="signal-card">
-              <span>{{ item.label }}</span>
-              <strong>{{ item.value }}</strong>
-            </article>
-          </div>
+            <div class="signal-grid">
+              <article
+                v-for="(item, index) in activeProject.signals"
+                :key="item.label"
+                class="signal-card signal-card-project"
+                :style="{ '--signal-order': index }"
+              >
+                <span>{{ item.label }}</span>
+                <strong>{{ item.value }}</strong>
+              </article>
+            </div>
 
-          <div class="stack-row">
-            <span v-for="item in activeProject.stack" :key="item" class="tag-chip">
-              {{ item }}
-            </span>
-          </div>
+            <div class="stack-row">
+              <span v-for="item in activeProject.stack" :key="item" class="tag-chip">
+                {{ item }}
+              </span>
+            </div>
 
-          <div class="detail-list">
-            <p v-for="item in activeProject.details" :key="item">
-              {{ item }}
-            </p>
+            <div class="detail-list">
+              <p v-for="item in activeProject.details" :key="item">
+                {{ item }}
+              </p>
+            </div>
           </div>
-        </div>
+        </Transition>
       </article>
     </div>
   </section>
