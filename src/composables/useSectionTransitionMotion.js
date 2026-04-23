@@ -63,7 +63,7 @@ const toArray = (value) => (Array.isArray(value) ? value : [value]);
 export function useSectionTransitionMotion() {
   let context = null;
 
-  // 鎶婂悇涓ā鍧楃殑鍏ュ満鍙樻垚 GSAP 婊氬姩鏃堕棿绾匡紝璁╃珷鑺備箣闂寸殑鎺ヨ浆鏇寸粏鑵汇€?
+  // 把各个模块的入场改成 GSAP 滚动时间线，让章节之间的切换更细腻。
   const createSectionTimelines = () => {
     context = gsap.context(() => {
       SECTION_GROUPS.forEach((sectionConfig) => {
