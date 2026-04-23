@@ -86,9 +86,11 @@ const {
   pendingItem,
   submitting: guardSubmitting,
   errorMessage: guardErrorMessage,
+  guardMood,
   openDialog: openProtectedContactDialog,
   submitAnswer: submitProtectedContactAnswer,
   refreshChallenge: refreshProtectedContactChallenge,
+  notifyGuardEditing,
   closeDialog: closeProtectedContactDialog
 } = useProtectedContactAction(async (item) => {
   // 验证通过后，再执行真正的复制或发送动作。
@@ -182,9 +184,11 @@ usePointerGlow();
       :pending-item="pendingItem"
       :submitting="guardSubmitting"
       :error-message="guardErrorMessage"
+      :guard-mood="guardMood"
       @close="closeProtectedContactDialog"
       @submit="submitProtectedContactAnswer"
       @refresh="refreshProtectedContactChallenge"
+      @editing="notifyGuardEditing"
     />
   </div>
 </template>
