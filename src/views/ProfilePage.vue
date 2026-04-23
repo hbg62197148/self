@@ -18,6 +18,7 @@ import { usePointerGlow } from "../composables/usePointerGlow";
 import { useProfileContent } from "../composables/useProfileContent";
 import { useProtectedContactAction } from "../composables/useProtectedContactAction";
 import { useRevealOnScroll } from "../composables/useRevealOnScroll";
+import { useSectionTransitionMotion } from "../composables/useSectionTransitionMotion";
 
 const navItems = [
   { id: "home", label: "Home" },
@@ -141,6 +142,7 @@ watch(
 
 useRevealOnScroll();
 usePointerGlow();
+useSectionTransitionMotion();
 </script>
 
 <template>

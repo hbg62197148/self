@@ -1,9 +1,8 @@
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, ref } from "vue";
+import { useIdentityMotion } from "../../composables/useIdentityMotion";
 import SectionHeading from "../SectionHeading.vue";
 import Staged from "../Staged.vue";
-
-const MAX_ROW_SHIFT = 12;
 
 const props = defineProps({
   deconstruction: {
@@ -13,9 +12,7 @@ const props = defineProps({
 });
 
 const activeRowId = ref(null);
-const rowShifts = reactive({});
-
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const activeLetterId = ref(null);
 
 const rows = computed(() =>
   props.deconstruction.cards.map((item, index, source) => ({
@@ -27,53 +24,22 @@ const rows = computed(() =>
 
 const identityLetters = computed(() => props.deconstruction.cards.map((item) => item.letter).join(""));
 
-// 记录当前聚焦的行，用来控制其余行的降亮状态。
-const activateRow = (rowId) => {
-  activeRowId.value = rowId;
-};
-
-const resetRowShift = (rowId) => {
-  rowShifts[rowId] = "0px";
-};
-
-const releaseRow = (rowId) => {
-  if (activeRowId.value === rowId) {
-    activeRowId.value = null;
-  }
-
-  resetRowShift(rowId);
-};
-
-// 根据鼠标在当前行内的水平位置，生成轻微的横向视差偏移。
-const handleRowPointerMove = (rowId, event) => {
-  const rowBounds = event.currentTarget.getBoundingClientRect();
-  const progress = (event.clientX - rowBounds.left) / rowBounds.width - 0.5;
-  const shift = clamp(progress * MAX_ROW_SHIFT * 2, -MAX_ROW_SHIFT, MAX_ROW_SHIFT);
-
-  activateRow(rowId);
-  rowShifts[rowId] = `${shift.toFixed(2)}px`;
-};
-
-const handleRowFocusOut = (rowId, event) => {
-  if (event.currentTarget.contains(event.relatedTarget)) {
-    return;
-  }
-
-  releaseRow(rowId);
-};
-
-const handleRowPointerLeave = (rowId, event) => {
-  if (event.currentTarget.contains(document.activeElement)) {
-    resetRowShift(rowId);
-    return;
-  }
-
-  releaseRow(rowId);
-};
+const {
+  setRowRef,
+  setShellRef,
+  setCopyRef,
+  setFlipRef,
+  activateRow,
+  handleRowPointerMove,
+  handleRowPointerEnter,
+  handleRowPointerLeave,
+  handleRowFocusOut,
+  activateLetter,
+  releaseLetter
+} = useIdentityMotion(activeRowId, activeLetterId);
 
 const getRowStyle = (row) => ({
-  "--row-progress": row.rowProgress,
-  "--row-shift": rowShifts[row.rowId] ?? "0px"
+  "--row-progress": row.rowProgress
 });
 </script>
 
@@ -100,6 +66,7 @@ const getRowStyle = (row) => ({
         <Staged
           v-for="(item, index) in rows"
           :key="item.rowId"
+          :ref="(element) => setRowRef(item.rowId, element)"
           as="div"
           :class="[
             'name-row',
@@ -110,14 +77,27 @@ const getRowStyle = (row) => ({
           ]"
           :order="2 + index"
           :style="getRowStyle(item)"
-          @mouseenter="activateRow(item.rowId)"
+          @mouseenter="handleRowPointerEnter(item.rowId)"
           @mousemove="handleRowPointerMove(item.rowId, $event)"
           @mouseleave="handleRowPointerLeave(item.rowId, $event)"
           @focusin="activateRow(item.rowId)"
           @focusout="handleRowFocusOut(item.rowId, $event)"
         >
-          <span class="name-letter-shell" tabindex="0" :aria-label="`${item.letter} / ${item.zh}`">
-            <span class="name-letter-flip" aria-hidden="true">
+          <span
+            :ref="(element) => setShellRef(item.rowId, element)"
+            class="name-letter-shell"
+            tabindex="0"
+            :aria-label="`${item.letter} / ${item.zh}`"
+            @mouseenter="activateLetter(item.rowId)"
+            @mouseleave="releaseLetter(item.rowId)"
+            @focus="activateLetter(item.rowId)"
+            @blur="releaseLetter(item.rowId)"
+          >
+            <span
+              :ref="(element) => setFlipRef(item.rowId, element)"
+              class="name-letter-flip"
+              aria-hidden="true"
+            >
               <span class="name-letter-face name-letter-front">
                 <span class="name-letter">{{ item.letter }}</span>
               </span>
@@ -129,7 +109,7 @@ const getRowStyle = (row) => ({
             </span>
           </span>
 
-          <div class="name-copy">
+          <div :ref="(element) => setCopyRef(item.rowId, element)" class="name-copy">
             <em>{{ item.word }}</em>
             <small class="name-translation">{{ item.zh }}</small>
             <p>{{ item.text }}</p>

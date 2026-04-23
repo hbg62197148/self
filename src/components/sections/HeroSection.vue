@@ -1,6 +1,6 @@
 <script setup>
 import Staged from "../Staged.vue";
-import { useBouncingDisc } from "../../composables/useBouncingDisc";
+import { useHeroMotion } from "../../composables/useHeroMotion";
 
 defineProps({
   hero: {
@@ -21,12 +21,22 @@ defineProps({
   }
 });
 
-// 让主视觉圆球在卡片内部缓慢漂移，并在触边时反弹。
-const { portraitCardRef, portraitDiscRef, portraitDiscStyle } = useBouncingDisc();
+// 首屏的漂浮球、文案入场、视差和 CTA 微交互都交给 GSAP 统一处理。
+const {
+  heroSectionRef,
+  portraitCardRef,
+  portraitDiscFrameRef,
+  portraitDiscRef,
+  portraitGlowOneRef,
+  portraitGlowTwoRef,
+  floatingPillRef,
+  primaryCtaRef,
+  secondaryCtaRef
+} = useHeroMotion();
 </script>
 
 <template>
-  <section class="hero panel" id="home" data-reveal>
+  <section ref="heroSectionRef" class="hero panel" id="home" data-reveal>
     <div class="hero-copy">
       <Staged as="p" class="section-kicker" :order="0">
         {{ hero.issue }}
@@ -46,11 +56,13 @@ const { portraitCardRef, portraitDiscRef, portraitDiscStyle } = useBouncingDisc(
       </Staged>
 
       <Staged class="hero-actions" :order="4">
-        <a class="button button-primary" :href="hero.primaryCta.href">
-          {{ hero.primaryCta.label }}
+        <a ref="primaryCtaRef" class="button button-primary hero-cta" :href="hero.primaryCta.href">
+          <span class="hero-cta-spotlight" aria-hidden="true" />
+          <span class="hero-cta-label">{{ hero.primaryCta.label }}</span>
         </a>
-        <a class="button button-secondary" :href="hero.secondaryCta.href">
-          {{ hero.secondaryCta.label }}
+        <a ref="secondaryCtaRef" class="button button-secondary hero-cta" :href="hero.secondaryCta.href">
+          <span class="hero-cta-spotlight" aria-hidden="true" />
+          <span class="hero-cta-label">{{ hero.secondaryCta.label }}</span>
         </a>
       </Staged>
 
@@ -71,16 +83,18 @@ const { portraitCardRef, portraitDiscRef, portraitDiscStyle } = useBouncingDisc(
     <div class="hero-stage">
       <Staged class="portrait-shell" :order="2">
         <div ref="portraitCardRef" class="portrait-card">
-          <div class="portrait-glow portrait-glow-one" />
-          <div class="portrait-glow portrait-glow-two" />
+          <div ref="portraitGlowOneRef" class="portrait-glow portrait-glow-one" />
+          <div ref="portraitGlowTwoRef" class="portrait-glow portrait-glow-two" />
           <div class="portrait-grid" />
-          <div ref="portraitDiscRef" class="portrait-disc" :style="portraitDiscStyle" />
+          <div ref="portraitDiscFrameRef" class="portrait-disc-frame">
+            <div ref="portraitDiscRef" class="portrait-disc" />
+          </div>
           <div class="portrait-plate">
             <span>{{ nameCn }}</span>
             <strong>{{ nameEn }}</strong>
           </div>
         </div>
-        <div class="floating-pill floating-pill-top">{{ role }}</div>
+        <div ref="floatingPillRef" class="floating-pill floating-pill-top">{{ role }}</div>
       </Staged>
 
       <Staged as="aside" class="hero-sidecard" :order="6">

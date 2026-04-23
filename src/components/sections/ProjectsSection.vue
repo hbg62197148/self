@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from "vue";
+import { ref, watch } from "vue";
+import { useProjectPanelMotion } from "../../composables/useProjectPanelMotion";
 import SectionHeading from "../SectionHeading.vue";
 import Staged from "../Staged.vue";
 
@@ -16,14 +17,45 @@ const props = defineProps({
 
 const emit = defineEmits(["update:activeProjectId"]);
 
-const activeProject = computed(
-  () => props.projects.items.find((item) => item.id === props.activeProjectId) ?? props.projects.items[0]
-);
+const resolveProject = (projectId) =>
+  props.projects.items.find((item) => item.id === projectId) ?? props.projects.items[0] ?? null;
+
+const displayedProject = ref(resolveProject(props.activeProjectId));
+const { detailSwapRef, switchProject } = useProjectPanelMotion(displayedProject);
 
 // 左侧项目标签负责驱动右侧详情面板的切换。
 const selectProject = (projectId) => {
   emit("update:activeProjectId", projectId);
 };
+
+watch(
+  () => props.activeProjectId,
+  (nextId) => {
+    const nextProject = resolveProject(nextId);
+
+    if (!nextProject || nextProject.id === displayedProject.value?.id) {
+      return;
+    }
+
+    switchProject(nextProject);
+  }
+);
+
+watch(
+  () => props.projects.items,
+  (items) => {
+    const nextProject = resolveProject(props.activeProjectId);
+
+    if (!nextProject) {
+      displayedProject.value = null;
+      return;
+    }
+
+    if (!displayedProject.value || !items.some((item) => item.id === displayedProject.value.id)) {
+      displayedProject.value = nextProject;
+    }
+  }
+);
 </script>
 
 <template>
@@ -41,6 +73,7 @@ const selectProject = (projectId) => {
           :key="item.id"
           as="button"
           type="button"
+          :aria-pressed="item.id === activeProjectId"
           :class="['project-tab', { 'is-active': item.id === activeProjectId }]"
           :order="2 + index"
           @click="selectProject(item.id)"
@@ -55,43 +88,46 @@ const selectProject = (projectId) => {
       </div>
 
       <article class="project-detail panel-inset stage-item" :style="{ '--stage-order': 6 }">
-        <Transition name="project-panel" mode="out-in">
-          <div :key="activeProject.id" class="project-detail-swap">
-            <div class="project-detail-head">
-              <div>
-                <p class="mini-label">{{ activeProject.category }}</p>
-                <h3>{{ activeProject.title }}</h3>
-              </div>
-              <span class="detail-index">{{ activeProject.index }}</span>
+        <div
+          v-if="displayedProject"
+          ref="detailSwapRef"
+          :key="displayedProject.id"
+          class="project-detail-swap"
+        >
+          <div class="project-detail-head">
+            <div>
+              <p class="mini-label">{{ displayedProject.category }}</p>
+              <h3>{{ displayedProject.title }}</h3>
             </div>
-
-            <p class="project-description">{{ activeProject.description }}</p>
-
-            <div class="signal-grid">
-              <article
-                v-for="(item, index) in activeProject.signals"
-                :key="item.label"
-                class="signal-card signal-card-project"
-                :style="{ '--signal-order': index }"
-              >
-                <span>{{ item.label }}</span>
-                <strong>{{ item.value }}</strong>
-              </article>
-            </div>
-
-            <div class="stack-row">
-              <span v-for="item in activeProject.stack" :key="item" class="tag-chip">
-                {{ item }}
-              </span>
-            </div>
-
-            <div class="detail-list">
-              <p v-for="item in activeProject.details" :key="item">
-                {{ item }}
-              </p>
-            </div>
+            <span class="detail-index">{{ displayedProject.index }}</span>
           </div>
-        </Transition>
+
+          <p class="project-description">{{ displayedProject.description }}</p>
+
+          <div class="signal-grid">
+            <article
+              v-for="(item, index) in displayedProject.signals"
+              :key="item.label"
+              class="signal-card signal-card-project"
+              :style="{ '--signal-order': index }"
+            >
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </article>
+          </div>
+
+          <div class="stack-row">
+            <span v-for="item in displayedProject.stack" :key="item" class="tag-chip">
+              {{ item }}
+            </span>
+          </div>
+
+          <div class="detail-list">
+            <p v-for="item in displayedProject.details" :key="item">
+              {{ item }}
+            </p>
+          </div>
+        </div>
       </article>
     </div>
   </section>
