@@ -135,6 +135,164 @@ button {
   transform: rotate(-10deg) scale(1.05);
 }
 
+.motion-orb {
+  position: fixed;
+  left: 24px;
+  bottom: 26px;
+  z-index: 36;
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.34), transparent 28%),
+    radial-gradient(circle at 72% 76%, var(--active-glow), transparent 44%),
+    rgba(7, 7, 7, 0.72);
+  color: var(--text);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.3),
+    0 0 0 1px var(--active-glow-soft);
+  backdrop-filter: blur(18px);
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.motion-orb:hover,
+.motion-orb:focus-visible {
+  transform: translateY(-2px) scale(1.03);
+  border-color: var(--active-glow);
+  outline: none;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.34),
+    0 0 0 1px var(--active-glow),
+    0 0 26px var(--active-glow-soft);
+}
+
+.motion-orb-ring {
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: inherit;
+  animation: orbit-spin 9s linear infinite;
+  opacity: 0.84;
+}
+
+.motion-orb-core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, var(--active-glow), rgba(255, 255, 255, 0.08)),
+    rgba(255, 255, 255, 0.06);
+}
+
+.motion-orb-wave {
+  position: absolute;
+  inset: -32%;
+  background: conic-gradient(from 120deg, transparent, rgba(255, 255, 255, 0.4), transparent, var(--active-glow));
+  animation: orbit-spin 4.8s linear infinite;
+  opacity: 0.76;
+}
+
+.motion-orb-dot {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--text);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.55);
+}
+
+.motion-orb-copy {
+  position: absolute;
+  right: -2px;
+  bottom: -4px;
+  min-width: 32px;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(5, 5, 5, 0.82);
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.motion-orb.is-lite {
+  border-color: rgba(123, 247, 212, 0.34);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.24), transparent 28%),
+    radial-gradient(circle at 72% 76%, rgba(123, 247, 212, 0.2), transparent 48%),
+    rgba(7, 7, 7, 0.76);
+}
+
+.motion-orb.is-lite .motion-orb-ring,
+.motion-orb.is-lite .motion-orb-wave {
+  animation-play-state: paused;
+}
+
+html.motion-lite body {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(123, 247, 212, 0.08), transparent 18%),
+    radial-gradient(circle at 80% 24%, rgba(158, 169, 255, 0.08), transparent 18%),
+    linear-gradient(180deg, #090909 0%, #050505 100%);
+}
+
+html.motion-lite .background-noise {
+  opacity: 0.36;
+}
+
+html.motion-lite .background-noise::before,
+html.motion-lite .background-noise::after {
+  transform: none;
+}
+
+html.motion-lite .background-noise::before {
+  filter: blur(8px);
+  opacity: 0.42;
+}
+
+html.motion-lite .background-noise::after {
+  opacity: 0.14;
+}
+
+html.motion-lite .section-motion-aura,
+html.motion-lite .section-motion-scan,
+html.motion-lite .surface-spotlight,
+html.motion-lite .hero-cta-spotlight {
+  display: none !important;
+}
+
+html.motion-lite .orbit,
+html.motion-lite .universe-link-line,
+html.motion-lite .universe-core.is-pulsing,
+html.motion-lite .project-tab.is-active::after,
+html.motion-lite .about-spider-body {
+  animation-play-state: paused !important;
+}
+
+html.motion-lite .panel,
+html.motion-lite .panel-inset,
+html.motion-lite .site-header,
+html.motion-lite .chapter-beacon {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+html.motion-lite .portrait-glow {
+  opacity: 0.24 !important;
+  filter: blur(24px);
+}
+
 .loading-screen {
   position: fixed;
   inset: 0;
@@ -2964,6 +3122,23 @@ button {
 
   .chapter-beacon {
     display: none;
+  }
+
+  .motion-orb {
+    left: 14px;
+    bottom: 16px;
+    width: 58px;
+    height: 58px;
+  }
+
+  .motion-orb-core {
+    width: 36px;
+    height: 36px;
+  }
+
+  .motion-orb-copy {
+    min-width: 28px;
+    font-size: 0.62rem;
   }
 
   .name-stack {

@@ -1,6 +1,7 @@
-import { nextTick, onBeforeUnmount, onMounted } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useMotionPreference } from "./useMotionPreference";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,8 +63,23 @@ const SECTION_GROUPS = [
 const toArray = (value) => (Array.isArray(value) ? value : [value]);
 
 export function useSectionTransitionMotion() {
+  const { isMotionLite } = useMotionPreference();
+
   let context = null;
+  let createFrameId = 0;
+  let stopMotionWatch = null;
   const cleanupChrome = [];
+
+  const cleanupSectionMotion = () => {
+    if (createFrameId) {
+      window.cancelAnimationFrame(createFrameId);
+      createFrameId = 0;
+    }
+
+    context?.revert();
+    context = null;
+    cleanupChrome.splice(0).forEach((cleanup) => cleanup());
+  };
 
   const ensureSectionChrome = (section) => {
     let aura = section.querySelector(":scope > .section-motion-aura");
@@ -96,8 +112,10 @@ export function useSectionTransitionMotion() {
     return toArray(section.querySelector(group.selector)).filter(Boolean);
   };
 
-  // 把各个模块的入场变成 GSAP 滚动时间线，让章节之间的衔接更接近官网式 showcase。
+  // 完整动效模式下启用滚动时间线；弱动效模式会撤销 ScrollTrigger 和扫描光层。
   const createSectionTimelines = () => {
+    cleanupSectionMotion();
+
     context = gsap.context(() => {
       SECTION_GROUPS.forEach((sectionConfig) => {
         const section = document.getElementById(sectionConfig.id);
@@ -225,17 +243,32 @@ export function useSectionTransitionMotion() {
     });
   };
 
-  onMounted(async () => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const scheduleSectionTimelines = async () => {
+    if (isMotionLite.value || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
     await nextTick();
-    window.requestAnimationFrame(createSectionTimelines);
+    createFrameId = window.requestAnimationFrame(createSectionTimelines);
+  };
+
+  onMounted(() => {
+    stopMotionWatch = watch(
+      isMotionLite,
+      (liteMode) => {
+        if (liteMode) {
+          cleanupSectionMotion();
+          return;
+        }
+
+        scheduleSectionTimelines();
+      },
+      { immediate: true }
+    );
   });
 
   onBeforeUnmount(() => {
-    context?.revert();
-    cleanupChrome.splice(0).forEach((cleanup) => cleanup());
+    stopMotionWatch?.();
+    cleanupSectionMotion();
   });
 }

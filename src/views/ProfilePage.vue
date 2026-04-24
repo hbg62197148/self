@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import ContactCaptchaDialog from "../components/contact/ContactCaptchaDialog.vue";
 import ChapterBeacon from "../components/layout/ChapterBeacon.vue";
 import LoadingScreen from "../components/layout/LoadingScreen.vue";
+import MotionControlOrb from "../components/layout/MotionControlOrb.vue";
 import SiteFooter from "../components/layout/SiteFooter.vue";
 import SiteHeader from "../components/layout/SiteHeader.vue";
 import AboutSection from "../components/sections/AboutSection.vue";
@@ -154,6 +155,8 @@ useSurfaceMotion();
     <div class="background-noise" aria-hidden="true" />
 
     <ChapterBeacon :active-meta="activeMeta" />
+
+    <MotionControlOrb />
 
     <SiteHeader :nav-items="navItems" :active-section="activeSection" />
 

@@ -1,5 +1,6 @@
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { gsap } from "gsap";
+import { useMotionPreference } from "./useMotionPreference";
 
 const FRAME_PADDING = 16;
 const MIN_SPEED = 16;
@@ -24,6 +25,8 @@ const clampVelocity = (value) => {
 };
 
 export function useHeroMotion() {
+  const { isMotionLite } = useMotionPreference();
+
   const heroSectionRef = ref(null);
   const portraitCardRef = ref(null);
   const portraitDiscFrameRef = ref(null);
@@ -58,6 +61,7 @@ export function useHeroMotion() {
   let lastFrameTime = 0;
   let removeCardEvents = null;
   let removeTitleEvents = null;
+  let stopMotionWatch = null;
   const magneticCleanups = [];
 
   const setDiscPosition = () => {
@@ -102,6 +106,11 @@ export function useHeroMotion() {
   };
 
   const stepDisc = (timestamp) => {
+    if (isMotionLite.value) {
+      animationFrameId = 0;
+      return;
+    }
+
     if (!portraitDiscFrameRef.value) {
       animationFrameId = window.requestAnimationFrame(stepDisc);
       return;
@@ -139,6 +148,31 @@ export function useHeroMotion() {
     setDiscPosition();
 
     animationFrameId = window.requestAnimationFrame(stepDisc);
+  };
+
+  const startDiscMotion = () => {
+    if (animationFrameId || isMotionLite.value) {
+      return;
+    }
+
+    lastFrameTime = 0;
+    animationFrameId = window.requestAnimationFrame(stepDisc);
+
+    if (!driftTimerId) {
+      driftTimerId = window.setInterval(nudgeVelocity, DRIFT_INTERVAL);
+    }
+  };
+
+  const stopDiscMotion = () => {
+    if (animationFrameId) {
+      window.cancelAnimationFrame(animationFrameId);
+      animationFrameId = 0;
+    }
+
+    if (driftTimerId) {
+      window.clearInterval(driftTimerId);
+      driftTimerId = 0;
+    }
   };
 
   const collectIntroTargets = () => {
@@ -563,8 +597,19 @@ export function useHeroMotion() {
     attachMagneticCta(primaryCtaRef);
     attachMagneticCta(secondaryCtaRef);
 
-    animationFrameId = window.requestAnimationFrame(stepDisc);
-    driftTimerId = window.setInterval(nudgeVelocity, DRIFT_INTERVAL);
+    // 弱动效模式下暂停首页圆球的持续漂移，减少常驻 requestAnimationFrame。
+    stopMotionWatch = watch(
+      isMotionLite,
+      (liteMode) => {
+        if (liteMode) {
+          stopDiscMotion();
+          return;
+        }
+
+        startDiscMotion();
+      },
+      { immediate: true }
+    );
 
     if ("ResizeObserver" in window) {
       resizeObserver = new window.ResizeObserver(() => {
@@ -597,14 +642,8 @@ export function useHeroMotion() {
     removeResizeFallback?.();
     removeCardEvents?.();
     removeTitleEvents?.();
-
-    if (driftTimerId) {
-      window.clearInterval(driftTimerId);
-    }
-
-    if (animationFrameId) {
-      window.cancelAnimationFrame(animationFrameId);
-    }
+    stopMotionWatch?.();
+    stopDiscMotion();
 
     magneticCleanups.forEach((cleanup) => {
       cleanup();

@@ -20,7 +20,7 @@ export const defaultProfile = {
     },
     pulse: "Open to full-time opportunities",
     summary:
-      "目前正在寻找更合适的全职机会，方向偏前端开发与体验实现，也愿意和有想法、有完成度要求的团队一起做长期投入的产品。",
+      "目前正在寻找更合适的全职机会，方向偏前端开发，也愿意和有想法、有完成度要求的团队一起做长期投入的产品。",
     stats: [
       {
         label: "Base",

@@ -1,5 +1,6 @@
-import { nextTick, onBeforeUnmount, onMounted } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
 import { gsap } from "gsap";
+import { useMotionPreference } from "./useMotionPreference";
 
 const SURFACE_SELECTOR = [
   ".stat-card",
@@ -17,8 +18,24 @@ const SPOTLIGHT_SIZE = 190;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 export function useSurfaceMotion() {
+  const { isMotionLite } = useMotionPreference();
+
   const cleanups = [];
   let observer = null;
+  let scanFrameId = 0;
+  let stopMotionWatch = null;
+
+  const clearSurfaces = () => {
+    observer?.disconnect();
+    observer = null;
+
+    if (scanFrameId) {
+      window.cancelAnimationFrame(scanFrameId);
+      scanFrameId = 0;
+    }
+
+    cleanups.splice(0).forEach((cleanup) => cleanup());
+  };
 
   const attachSurface = (surface) => {
     if (surface.dataset.surfaceMotionBound === "true") {
@@ -50,7 +67,7 @@ export function useSurfaceMotion() {
       scale: 0.82
     });
 
-    // 鼠标在卡片内部移动时，只做很轻的位移和倾斜，避免抢走内容本身的阅读焦点。
+    // 卡片光斑和轻微 3D 倾斜是全局重型 hover，弱动效模式下会整体卸载。
     const handleMove = (event) => {
       const rect = surface.getBoundingClientRect();
       const localX = event.clientX - rect.left;
@@ -144,6 +161,9 @@ export function useSurfaceMotion() {
       surface.removeEventListener("focusin", handleFocus);
       surface.removeEventListener("focusout", handleLeave);
       gsap.killTweensOf([surface, spotlight]);
+      gsap.set(surface, {
+        clearProps: "x,y,rotateX,rotateY,scale,transformPerspective,transformOrigin"
+      });
       spotlight.remove();
       surface.classList.remove("surface-motion", "is-surface-active");
       delete surface.dataset.surfaceMotionBound;
@@ -151,11 +171,19 @@ export function useSurfaceMotion() {
   };
 
   const scanSurfaces = () => {
+    scanFrameId = 0;
     document.querySelectorAll(SURFACE_SELECTOR).forEach(attachSurface);
   };
 
-  onMounted(async () => {
+  const scheduleScan = () => {
+    if (!scanFrameId) {
+      scanFrameId = window.requestAnimationFrame(scanSurfaces);
+    }
+  };
+
+  const enableSurfaceMotion = async () => {
     if (
+      isMotionLite.value ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       !window.matchMedia("(pointer: fine)").matches
     ) {
@@ -163,21 +191,36 @@ export function useSurfaceMotion() {
     }
 
     await nextTick();
-    window.requestAnimationFrame(scanSurfaces);
+    scheduleScan();
 
     const root = document.querySelector(".page-content");
 
-    if (root) {
-      observer = new MutationObserver(() => window.requestAnimationFrame(scanSurfaces));
+    if (root && !observer) {
+      observer = new MutationObserver(scheduleScan);
       observer.observe(root, {
         childList: true,
         subtree: true
       });
     }
+  };
+
+  onMounted(() => {
+    stopMotionWatch = watch(
+      isMotionLite,
+      (liteMode) => {
+        if (liteMode) {
+          clearSurfaces();
+          return;
+        }
+
+        enableSurfaceMotion();
+      },
+      { immediate: true }
+    );
   });
 
   onBeforeUnmount(() => {
-    observer?.disconnect();
-    cleanups.splice(0).forEach((cleanup) => cleanup());
+    stopMotionWatch?.();
+    clearSurfaces();
   });
 }
