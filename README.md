@@ -223,7 +223,7 @@ npm run preview
 ### 启动生产服务
 
 ```bash
-npm run start
+npm run start 
 ```
 
 这个命令会启动：
@@ -261,9 +261,6 @@ npm run start
 │   ├── App.vue                     # 应用壳组件
 │   ├── main.js                     # 前端入口
 │   └── styles.css                  # 全局样式
-├── unknown/                        # 和主项目无关的独立小游戏目录
-│   ├── index.html                  # 浏览器版俄罗斯方块
-│   └── tetris-terminal.mjs         # 终端版俄罗斯方块
 ├── index.html
 ├── package.json
 └── README.md
