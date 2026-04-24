@@ -232,6 +232,7 @@ button {
 }
 
 .site-nav {
+  position: relative;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -239,7 +240,26 @@ button {
   gap: 6px;
 }
 
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  border: 1px solid var(--active-glow);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 28% 0%, var(--active-glow), transparent 60%),
+    rgba(255, 255, 255, 0.075);
+  box-shadow:
+    0 0 0 1px var(--active-glow-soft),
+    0 10px 28px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .nav-link {
+  position: relative;
+  z-index: 1;
   padding: 10px 14px;
   border-radius: 999px;
   color: var(--muted);
@@ -247,10 +267,15 @@ button {
   transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
 }
 
-.nav-link:hover,
-.nav-link.is-active {
+.nav-link:hover {
   color: var(--text);
   background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.nav-link.is-active {
+  color: var(--text);
+  background: transparent;
   transform: translateY(-1px);
 }
 
@@ -275,9 +300,28 @@ button {
   background: rgba(7, 7, 7, 0.58);
   backdrop-filter: blur(16px);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  transition: border-color 220ms ease, box-shadow 220ms ease;
 }
 
-.chapter-beacon span {
+.chapter-beacon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent, var(--active-glow-soft), transparent);
+  opacity: 0.78;
+}
+
+.chapter-beacon-pulse {
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  background: radial-gradient(circle at 18% 50%, var(--active-glow), transparent 64%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chapter-beacon-index {
   display: inline-grid;
   place-items: center;
   width: 34px;
@@ -288,6 +332,12 @@ button {
   font-family: "Bebas Neue", sans-serif;
   font-size: 1.2rem;
   letter-spacing: 0.08em;
+}
+
+.chapter-beacon-index,
+.chapter-beacon strong {
+  position: relative;
+  z-index: 1;
 }
 
 .chapter-beacon strong {
@@ -319,6 +369,42 @@ button {
     var(--surface-alt);
 }
 
+.surface-motion {
+  position: relative;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.surface-motion > :not(.surface-spotlight) {
+  position: relative;
+  z-index: 1;
+}
+
+.surface-motion.is-surface-active {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px var(--active-glow-soft),
+    0 22px 52px rgba(0, 0, 0, 0.22);
+}
+
+.surface-spotlight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, var(--active-glow) 30%, transparent 70%);
+  filter: blur(1px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .hero,
 .section {
   padding: clamp(22px, 4vw, 36px);
@@ -336,6 +422,53 @@ button {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   pointer-events: none;
+}
+
+.section > :not(.section-motion-aura):not(.section-motion-scan) {
+  position: relative;
+  z-index: 1;
+}
+
+.section-motion-aura,
+.section-motion-scan {
+  position: absolute;
+  pointer-events: none;
+}
+
+.section-motion-aura {
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 18% 12%, var(--active-glow), transparent 32%),
+    linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.055) 38%, transparent 72%);
+  opacity: 0;
+  transform-origin: left center;
+}
+
+.section-motion-scan {
+  top: -16%;
+  bottom: -16%;
+  left: -28%;
+  z-index: 0;
+  width: 34%;
+  background: linear-gradient(105deg, transparent 8%, rgba(255, 255, 255, 0.16), var(--active-glow), transparent 72%);
+  filter: blur(1px);
+  opacity: 0;
+}
+
+.section.section-motion-managed .stage-item,
+.section.section-motion-managed .stage-subitem,
+.section.section-motion-managed .stage-fade {
+  transition: none;
+}
+
+.section.is-motion-active {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px var(--active-glow-soft),
+    0 24px 80px rgba(0, 0, 0, 0.18);
 }
 
 .section-kicker,
@@ -377,6 +510,10 @@ button {
 .hero.hero-gsap .hero-line {
   opacity: 1;
   transform: none;
+  transition: none;
+}
+
+.hero.hero-gsap .hero-char {
   transition: none;
 }
 
@@ -437,6 +574,9 @@ button {
 }
 
 .hero-line {
+  display: flex;
+  align-items: baseline;
+  overflow: hidden;
   font-size: clamp(4.6rem, 12vw, 9.2rem);
   opacity: 0;
   transform: translate3d(0, 48px, 0) rotateX(-65deg);
@@ -444,6 +584,11 @@ button {
   transition:
     opacity 700ms cubic-bezier(0.2, 1, 0.22, 1),
     transform 700ms cubic-bezier(0.2, 1, 0.22, 1);
+}
+
+.hero-char {
+  display: inline-block;
+  will-change: transform, opacity, filter;
 }
 
 [data-reveal].is-visible .hero-title .hero-line {
@@ -1664,7 +1809,56 @@ button {
   display: grid;
   gap: 18px;
   height: 100%;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity, filter, clip-path;
+}
+
+.project-showcase-ghost {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  padding: 18px;
+  border: 1px solid rgba(255, 106, 61, 0.36);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 106, 61, 0.2), transparent 44%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04)),
+    rgba(9, 9, 9, 0.92);
+  box-shadow:
+    0 24px 58px rgba(0, 0, 0, 0.36),
+    0 0 24px rgba(255, 106, 61, 0.18);
+  color: var(--text);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+}
+
+.project-showcase-ghost::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 18%, rgba(255, 255, 255, 0.16), transparent 58%);
+  transform: translateX(-120%);
+  animation: showcase-ghost-scan 720ms ease-out forwards;
+}
+
+.project-showcase-ghost span,
+.project-showcase-ghost strong {
+  position: relative;
+  z-index: 1;
+}
+
+.project-showcase-ghost span {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.project-showcase-ghost strong {
+  align-self: center;
+  font-size: 1.02rem;
+  line-height: 1.35;
 }
 
 .project-detail-head {
@@ -2416,6 +2610,12 @@ button {
   }
 }
 
+@keyframes showcase-ghost-scan {
+  to {
+    transform: translateX(120%);
+  }
+}
+
 @keyframes project-signal-rise {
   0% {
     opacity: 0;
@@ -2670,7 +2870,7 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .hero-title span {
+  .hero-title .hero-line {
     font-size: clamp(3.8rem, 16vw, 6.6rem);
   }
 

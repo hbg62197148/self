@@ -128,7 +128,7 @@ onBeforeUnmount(() => {
             :style="{ '--stage-order': 2 + index }"
             @click="selectQuestion(item)"
           >
-            {{ item.prompt }}
+            <span>{{ item.prompt }}</span>
           </button>
         </div>
 

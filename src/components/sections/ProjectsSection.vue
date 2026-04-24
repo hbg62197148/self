@@ -21,10 +21,13 @@ const resolveProject = (projectId) =>
   props.projects.items.find((item) => item.id === projectId) ?? props.projects.items[0] ?? null;
 
 const displayedProject = ref(resolveProject(props.activeProjectId));
-const { detailSwapRef, switchProject } = useProjectPanelMotion(displayedProject);
+const { detailPanelRef, detailSwapRef, switchProject } = useProjectPanelMotion(displayedProject);
 
-// 左侧项目标签负责驱动右侧详情面板的切换。
-const selectProject = (projectId) => {
+let pendingTabElement = null;
+
+// 左侧项目标签负责驱动右侧详情面板切换，并把点击来源交给 GSAP 做 showcase 过渡。
+const selectProject = (projectId, event) => {
+  pendingTabElement = event?.currentTarget ?? null;
   emit("update:activeProjectId", projectId);
 };
 
@@ -37,7 +40,9 @@ watch(
       return;
     }
 
-    switchProject(nextProject);
+    const sourceElement = pendingTabElement;
+    pendingTabElement = null;
+    switchProject(nextProject, sourceElement);
   }
 );
 
@@ -76,7 +81,7 @@ watch(
           :aria-pressed="item.id === activeProjectId"
           :class="['project-tab', { 'is-active': item.id === activeProjectId }]"
           :order="2 + index"
-          @click="selectProject(item.id)"
+          @click="selectProject(item.id, $event)"
         >
           <span class="project-index">{{ item.index }}</span>
           <div class="project-tab-copy">
@@ -87,7 +92,7 @@ watch(
         </Staged>
       </div>
 
-      <article class="project-detail panel-inset stage-item" :style="{ '--stage-order': 6 }">
+      <article ref="detailPanelRef" class="project-detail panel-inset stage-item" :style="{ '--stage-order': 6 }">
         <div
           v-if="displayedProject"
           ref="detailSwapRef"

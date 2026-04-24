@@ -57,6 +57,7 @@ export function useHeroMotion() {
   let animationFrameId = 0;
   let lastFrameTime = 0;
   let removeCardEvents = null;
+  let removeTitleEvents = null;
   const magneticCleanups = [];
 
   const setDiscPosition = () => {
@@ -151,6 +152,7 @@ export function useHeroMotion() {
       kicker: root.querySelector(".section-kicker"),
       eyebrow: root.querySelector(".hero-eyebrow"),
       lines: [...root.querySelectorAll(".hero-line")],
+      chars: [...root.querySelectorAll(".hero-char")],
       subtitle: root.querySelector(".hero-subtitle"),
       buttons: [...root.querySelectorAll(".hero-actions .button")],
       stats: [...root.querySelectorAll(".hero-stats .stat-card")],
@@ -178,10 +180,18 @@ export function useHeroMotion() {
     });
 
     gsap.set(targets.lines, {
+      autoAlpha: 1,
+      y: 0,
+      rotateX: 0
+    });
+
+    gsap.set(targets.chars, {
       autoAlpha: 0,
-      y: 54,
-      rotateX: -68,
-      transformOrigin: "top center"
+      yPercent: 112,
+      rotateX: -72,
+      rotateZ: 3,
+      filter: "blur(10px)",
+      transformOrigin: "50% 100%"
     });
 
     gsap.set(targets.subtitle, {
@@ -255,12 +265,17 @@ export function useHeroMotion() {
         duration: 0.58,
         stagger: 0.08
       })
-      .to(targets.lines, {
+      .to(targets.chars, {
         autoAlpha: 1,
-        y: 0,
+        yPercent: 0,
         rotateX: 0,
-        duration: 0.78,
-        stagger: 0.1
+        rotateZ: 0,
+        filter: "blur(0px)",
+        duration: 0.72,
+        stagger: {
+          each: 0.018,
+          from: "start"
+        }
       }, "-=0.28")
       .to(targets.subtitle, {
         autoAlpha: 1,
@@ -404,6 +419,49 @@ export function useHeroMotion() {
     };
   };
 
+  const setupTitleInteraction = () => {
+    const root = heroSectionRef.value;
+    const title = root?.querySelector(".hero-title");
+
+    if (!title || !window.matchMedia("(pointer: fine)").matches) {
+      return;
+    }
+
+    const chars = [...title.querySelectorAll(".hero-char")];
+
+    const handleEnter = (event) => {
+      const char = event.currentTarget;
+
+      gsap.killTweensOf(char);
+      gsap
+        .timeline()
+        .to(char, {
+          y: -10,
+          scale: 1.04,
+          rotateZ: randomRange(-4, 4),
+          duration: 0.18,
+          ease: "power2.out"
+        })
+        .to(char, {
+          y: 0,
+          scale: 1,
+          rotateZ: 0,
+          duration: 0.72,
+          ease: "elastic.out(1, 0.48)"
+        });
+    };
+
+    chars.forEach((char) => {
+      char.addEventListener("pointerenter", handleEnter);
+    });
+
+    removeTitleEvents = () => {
+      chars.forEach((char) => {
+        char.removeEventListener("pointerenter", handleEnter);
+      });
+    };
+  };
+
   // 给 CTA 加一点磁吸和光斑跟随，保留克制但可感知的 hover 反馈。
   const attachMagneticCta = (buttonRef) => {
     const button = buttonRef.value;
@@ -501,6 +559,7 @@ export function useHeroMotion() {
     waitForLoadingToFinish();
     measureBounds();
     setupPortraitParallax();
+    setupTitleInteraction();
     attachMagneticCta(primaryCtaRef);
     attachMagneticCta(secondaryCtaRef);
 
@@ -537,6 +596,7 @@ export function useHeroMotion() {
     resizeObserver?.disconnect();
     removeResizeFallback?.();
     removeCardEvents?.();
+    removeTitleEvents?.();
 
     if (driftTimerId) {
       window.clearInterval(driftTimerId);
@@ -557,7 +617,8 @@ export function useHeroMotion() {
       portraitGlowTwoRef.value,
       floatingPillRef.value,
       primaryCtaRef.value,
-      secondaryCtaRef.value
+      secondaryCtaRef.value,
+      ...(heroSectionRef.value?.querySelectorAll(".hero-char") ?? [])
     ]);
   });
 

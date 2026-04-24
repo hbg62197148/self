@@ -21,7 +21,9 @@ defineProps({
   }
 });
 
-// 首屏的漂浮球、文案入场、视差和 CTA 微交互都交给 GSAP 统一处理。
+const splitHeroLine = (line) => Array.from(String(line));
+
+// 首屏的漂浮球、标题拆字、视差和 CTA 微交互都交给 GSAP 统一处理。
 const {
   heroSectionRef,
   portraitCardRef,
@@ -46,8 +48,15 @@ const {
       </Staged>
 
       <Staged as="h1" class="hero-title" :order="2">
-        <span v-for="line in hero.title" :key="line" class="hero-line">
-          {{ line }}
+        <span v-for="line in hero.title" :key="line" class="hero-line" :aria-label="line">
+          <span
+            v-for="(char, charIndex) in splitHeroLine(line)"
+            :key="`${line}-${charIndex}`"
+            class="hero-char"
+            aria-hidden="true"
+          >
+            {{ char === " " ? "\u00a0" : char }}
+          </span>
         </span>
       </Staged>
 
