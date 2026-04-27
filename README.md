@@ -40,7 +40,7 @@
 
 - `Hero`：首页标题、CTA、漂浮球和个人信息卡片
 - `Identity`：字母拆解与中文释义悬停反馈
-- `About`：个人介绍、问答切换、互动蜘蛛动画
+- `About`：个人介绍、问答切换、互动信号探针扫描
 - `Skills`：技能宇宙节点、核心块和技能卡片
 - `Projects`：项目 tab、详情抽屉切换和信号卡
 - `Contact`：联系方式展示、复制/发送保护
@@ -110,8 +110,9 @@
 - Hero 标题逐字入场
 - Hero 漂浮球随机缓慢移动、碰撞反弹和鼠标视差
 - CTA 按钮磁吸和光斑跟随
+- 左下角悬浮球可切换完整动效 / 弱化动效，并支持拖拽吸边
 - Identity 字母翻面、行级视差和聚焦降亮
-- About 蜘蛛点击后吐丝下坠再回弹
+- About 信号探针点击后向下发出扫描光束
 - Skills 技能节点联动和连线反馈
 - Projects 详情抽屉切换、项目预览层飞入、信号卡延迟亮起
 - 章节滚动时的扫描光和分层入场
@@ -123,6 +124,7 @@
 主要逻辑集中在：
 
 - [src/composables/useHeroMotion.js](./src/composables/useHeroMotion.js)
+- [src/composables/useMotionPreference.js](./src/composables/useMotionPreference.js)
 - [src/composables/useIdentityMotion.js](./src/composables/useIdentityMotion.js)
 - [src/composables/useProjectPanelMotion.js](./src/composables/useProjectPanelMotion.js)
 - [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js)
@@ -145,6 +147,12 @@
 - 简化 [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js) 的滚动动画
 - 减少大面积 `filter: blur()`、`box-shadow`、`backdrop-filter`
 - 对低性能设备自动关闭部分动效
+
+目前项目已经内置动效模式开关：
+
+- 点击左下角悬浮球可在 `FX` 和 `Lite` 之间切换
+- `Lite` 模式会弱化部分全局动效，降低页面负载
+- 悬浮球支持拖拽，松手后会自动吸附到屏幕左右边缘
 
 ## 数据流
 
@@ -291,7 +299,7 @@ npm run start
 │   ├── components/
 │   │   ├── admin/              # 后台编辑组件
 │   │   ├── contact/            # 联系验证码弹窗与小人物
-│   │   ├── layout/             # 页头、页脚、加载层、章节提示
+│   │   ├── layout/             # 页头、页脚、加载层与全局控件
 │   │   └── sections/           # 前台主要区块组件
 │   ├── composables/            # 页面逻辑与动效逻辑
 │   ├── data/                   # 默认内容模板
@@ -341,6 +349,7 @@ npm run start
 
 - [src/composables/useProfileContent.js](./src/composables/useProfileContent.js)
 - [src/composables/useProtectedContactAction.js](./src/composables/useProtectedContactAction.js)
+- [src/composables/useMotionPreference.js](./src/composables/useMotionPreference.js)
 - [src/composables/useHeroMotion.js](./src/composables/useHeroMotion.js)
 - [src/composables/useIdentityMotion.js](./src/composables/useIdentityMotion.js)
 - [src/composables/useProjectPanelMotion.js](./src/composables/useProjectPanelMotion.js)
