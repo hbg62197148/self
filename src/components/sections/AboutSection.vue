@@ -19,37 +19,37 @@ defineProps({
 });
 
 const emit = defineEmits(["update:activeQuestion"]);
-const isSpiderDropping = ref(false);
-const spiderDropDuration = 2750;
+const isProbeScanning = ref(false);
+const probeScanDuration = 2750;
 
-let spiderResetTimer = 0;
+let probeResetTimer = 0;
 
 // 切换问答内容时，仍由父组件统一维护当前激活的问题。
 const selectQuestion = (question) => {
   emit("update:activeQuestion", question);
 };
 
-// 点击蜘蛛后触发一次顺滑的吐丝下落动画。
-const triggerSpiderDrop = async () => {
-  if (spiderResetTimer) {
-    window.clearTimeout(spiderResetTimer);
+// 点击探针后触发一次向下扫描的信号动画。
+const triggerProbeScan = async () => {
+  if (probeResetTimer) {
+    window.clearTimeout(probeResetTimer);
   }
 
-  if (isSpiderDropping.value) {
-    isSpiderDropping.value = false;
+  if (isProbeScanning.value) {
+    isProbeScanning.value = false;
     await nextTick();
   }
 
-  isSpiderDropping.value = true;
+  isProbeScanning.value = true;
 
-  spiderResetTimer = window.setTimeout(() => {
-    isSpiderDropping.value = false;
-  }, spiderDropDuration);
+  probeResetTimer = window.setTimeout(() => {
+    isProbeScanning.value = false;
+  }, probeScanDuration);
 };
 
 onBeforeUnmount(() => {
-  if (spiderResetTimer) {
-    window.clearTimeout(spiderResetTimer);
+  if (probeResetTimer) {
+    window.clearTimeout(probeResetTimer);
   }
 });
 </script>
@@ -69,19 +69,17 @@ onBeforeUnmount(() => {
           <div class="about-frame">
             <button
               type="button"
-              :class="['about-spider-shell', { 'is-dropping': isSpiderDropping }]"
-              aria-label="点击触发蜘蛛吐丝下落"
-              @click="triggerSpiderDrop"
+              :class="['about-probe-shell', { 'is-scanning': isProbeScanning }]"
+              aria-label="点击触发信号探针扫描"
+              @click="triggerProbeScan"
             >
-              <span class="about-spider-web" aria-hidden="true" />
-              <span class="about-spider-body" aria-hidden="true">
-                <img
-                  class="about-spider"
-                  src="/about-spider.svg"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
+              <span class="about-probe-beam" aria-hidden="true" />
+              <span class="about-probe-sweep" aria-hidden="true" />
+              <span class="about-probe-body" aria-hidden="true">
+                <span class="about-probe-core" />
+                <span class="about-probe-ring about-probe-ring-a" />
+                <span class="about-probe-ring about-probe-ring-b" />
+                <span class="about-probe-tip" />
               </span>
             </button>
             <div class="about-frame-core" />
