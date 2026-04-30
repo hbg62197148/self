@@ -15,7 +15,6 @@ import SkillsSection from "../components/sections/SkillsSection.vue";
 import { useActiveSection } from "../composables/useActiveSection";
 import { useClipboard } from "../composables/useClipboard";
 import { useLoadingGate } from "../composables/useLoadingGate";
-import { usePointerGlow } from "../composables/usePointerGlow";
 import { useProfileContent } from "../composables/useProfileContent";
 import { useProtectedContactAction } from "../composables/useProtectedContactAction";
 import { useRevealOnScroll } from "../composables/useRevealOnScroll";
@@ -143,7 +142,6 @@ watch(
 );
 
 useRevealOnScroll();
-usePointerGlow();
 useSectionTransitionMotion();
 useSurfaceMotion();
 </script>

@@ -1,4 +1,4 @@
-<script setup>
+  <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useMotionPreference } from "../../composables/useMotionPreference";
 
