@@ -1,6 +1,6 @@
 # Personal Issue
 
-一个基于 `Vue 3 + Vite + Express + GSAP` 搭建的个人主页与轻量内容管理项目。
+一个基于 `Vue 3 + Vite + Express + GSAP + Three.js` 搭建的个人主页与轻量内容管理项目。
 
 它不只是静态展示页：前台展示个人介绍、身份拆解、技能、项目和联系方式；后台可以编辑并发布内容，前台通过接口读取最新 JSON 数据，不需要每次改代码后重新打包。
 
@@ -22,6 +22,7 @@
 - `Vue Router`
 - `Vite`
 - `GSAP`
+- `Three.js`
 - 原生 `CSS`
 - `@fontsource/bebas-neue`
 - `@fontsource/manrope`
@@ -38,10 +39,10 @@
 
 前台页面由这些区块组成：
 
-- `Hero`：首页标题、CTA、漂浮球和个人信息卡片
+- `Hero`：首页标题、CTA、Three.js 粒子信号核心和个人信息卡片
 - `Identity`：字母拆解与中文释义悬停反馈
 - `About`：个人介绍、问答切换、互动信号探针扫描
-- `Skills`：技能宇宙节点、核心块和技能卡片
+- `Skills`：Three.js 技能宇宙、技能节点联动、核心块和技能卡片
 - `Projects`：项目 tab、详情抽屉切换和信号卡
 - `Contact`：联系方式展示、复制/发送保护
 
@@ -131,6 +132,26 @@
 - [src/composables/useSurfaceMotion.js](./src/composables/useSurfaceMotion.js)
 - [src/composables/useSkillUniverse.js](./src/composables/useSkillUniverse.js)
 
+### Three.js 视觉增强
+
+项目在前台重点视觉区接入了轻量 Three.js 视觉层，用来强化个人信号系统的空间感。
+
+- Three.js 通过动态 `import("three")` 加载，不进入首屏主包
+- Hero 右侧头像卡片使用粒子环绕核心，替代原来的 CSS 渐变圆球
+- Skills 区块使用 3D 星图承载技能宇宙节点、连线和粒子流
+- 3D 场景只作为视觉层，原有 DOM 内容仍负责文本、按钮、hover、focus、click 和可访问交互
+- Skills hover 或点击技能节点时，3D 星图会同步高亮对应节点、连线和粒子流
+- WebGL 不可用时保留原 SVG 连线作为 fallback
+- `Lite` 模式下会降低 3D 层透明度并停止持续动画，保留静态视觉反馈
+
+相关文件：
+
+- [src/components/visuals/HeroSignalCoreScene.vue](./src/components/visuals/HeroSignalCoreScene.vue)
+- [src/components/visuals/SkillUniverseScene.vue](./src/components/visuals/SkillUniverseScene.vue)
+- [src/components/sections/HeroSection.vue](./src/components/sections/HeroSection.vue)
+- [src/components/sections/SkillsSection.vue](./src/components/sections/SkillsSection.vue)
+- [src/composables/useSkillUniverse.js](./src/composables/useSkillUniverse.js)
+
 ## 性能建议
 
 当前动效偏丰富，如果电脑打开页面出现卡顿，可以优先关闭较重的全局动效。
@@ -145,13 +166,15 @@
 
 - 关闭 [src/composables/usePointerGlow.js](./src/composables/usePointerGlow.js)
 - 简化 [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js) 的滚动动画
+- 关闭或降级 [src/components/visuals/HeroSignalCoreScene.vue](./src/components/visuals/HeroSignalCoreScene.vue) 的 Hero 粒子核心
+- 关闭或降级 [src/components/visuals/SkillUniverseScene.vue](./src/components/visuals/SkillUniverseScene.vue) 的 Three.js 星图
 - 减少大面积 `filter: blur()`、`box-shadow`、`backdrop-filter`
 - 对低性能设备自动关闭部分动效
 
 目前项目已经内置动效模式开关：
 
 - 点击左下角悬浮球可在 `FX` 和 `Lite` 之间切换
-- `Lite` 模式会弱化部分全局动效，降低页面负载
+- `Lite` 模式会弱化部分全局动效，并让 Three.js 视觉层停止持续动画，降低页面负载
 - 悬浮球支持拖拽，松手后会自动吸附到屏幕左右边缘
 
 ## 数据流
@@ -300,7 +323,8 @@ npm run start
 │   │   ├── admin/              # 后台编辑组件
 │   │   ├── contact/            # 联系验证码弹窗与小人物
 │   │   ├── layout/             # 页头、页脚、加载层与全局控件
-│   │   └── sections/           # 前台主要区块组件
+│   │   ├── sections/           # 前台主要区块组件
+│   │   └── visuals/            # Three.js 等视觉增强组件
 │   ├── composables/            # 页面逻辑与动效逻辑
 │   ├── data/                   # 默认内容模板
 │   ├── router/                 # 前端路由
@@ -332,6 +356,11 @@ npm run start
 - [src/components/sections/SkillsSection.vue](./src/components/sections/SkillsSection.vue)
 - [src/components/sections/ProjectsSection.vue](./src/components/sections/ProjectsSection.vue)
 - [src/components/sections/ContactSection.vue](./src/components/sections/ContactSection.vue)
+
+视觉增强：
+
+- [src/components/visuals/HeroSignalCoreScene.vue](./src/components/visuals/HeroSignalCoreScene.vue)
+- [src/components/visuals/SkillUniverseScene.vue](./src/components/visuals/SkillUniverseScene.vue)
 
 后台编辑：
 

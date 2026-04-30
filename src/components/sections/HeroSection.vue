@@ -1,5 +1,6 @@
 <script setup>
 import Staged from "../Staged.vue";
+import HeroSignalCoreScene from "../visuals/HeroSignalCoreScene.vue";
 import { useHeroMotion } from "../../composables/useHeroMotion";
 
 defineProps({
@@ -96,7 +97,9 @@ const {
           <div ref="portraitGlowTwoRef" class="portrait-glow portrait-glow-two" />
           <div class="portrait-grid" />
           <div ref="portraitDiscFrameRef" class="portrait-disc-frame">
-            <div ref="portraitDiscRef" class="portrait-disc" />
+            <div ref="portraitDiscRef" class="portrait-disc portrait-signal-core">
+              <HeroSignalCoreScene />
+            </div>
           </div>
           <div class="portrait-plate">
             <span>{{ nameCn }}</span>

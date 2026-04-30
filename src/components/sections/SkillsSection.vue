@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import SectionHeading from "../SectionHeading.vue";
 import Staged from "../Staged.vue";
+import SkillUniverseScene from "../visuals/SkillUniverseScene.vue";
 import { useSkillUniverse } from "../../composables/useSkillUniverse";
 
 const props = defineProps({
@@ -34,11 +35,18 @@ const {
 
     <div class="skills-layout">
       <Staged as="article" class="panel-inset universe-stage" :order="2" @mouseleave="clearActiveNode">
+        <SkillUniverseScene
+          :nodes="resolvedNodes"
+          :active-node-id="activeNodeId"
+          :active-tone="activeLink?.tone ?? '#ff6a3d'"
+          :pulsing="isCorePulsing"
+        />
+
         <div class="orbit orbit-outer stage-fade" :style="{ '--stage-order': 0 }" />
         <div class="orbit orbit-middle stage-fade" :style="{ '--stage-order': 1 }" />
         <div class="orbit orbit-inner stage-fade" :style="{ '--stage-order': 2 }" />
 
-        <svg class="universe-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <svg class="universe-links universe-links-fallback" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <g v-if="activeLink">
             <line
               class="universe-link-glow"
