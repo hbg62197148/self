@@ -53,7 +53,7 @@ const moodCopy = computed(() => {
   if (props.mood === "wrong") {
     return {
       title: "做错事了",
-      subtitle: "它有点心虚，想让你再认真算一次。"
+      subtitle: "它有点奇怪，想让你再认真算一次。"
     };
   }
 
