@@ -37,8 +37,8 @@ export function useSkillUniverse(nodesSource) {
   const normalizedNodes = computed(() =>
     (nodesSource.value ?? []).map((node) => ({
       ...node,
-      id: node.label,
-      resolvedX: node.label === "Motion" ? MOTION_NODE_X : parsePercent(node.x),
+      id: node.id ?? node.label,
+      resolvedX: (node.id ?? node.label) === "Motion" ? MOTION_NODE_X : parsePercent(node.x),
       resolvedY: parsePercent(node.y)
     }))
   );

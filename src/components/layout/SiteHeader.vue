@@ -11,9 +11,27 @@ const props = defineProps({
   activeSection: {
     type: String,
     default: "home"
+  },
+  copy: {
+    type: Object,
+    default: () => ({
+      brandTitle: "个人专刊",
+      brandSubtitle: "Personal Issue",
+      navAriaLabel: "页面导航",
+      adminLabel: "后台"
+    })
+  },
+  languageToggleLabel: {
+    type: String,
+    default: "EN"
+  },
+  languageToggleAriaLabel: {
+    type: String,
+    default: "切换语言"
   }
 });
 
+const emit = defineEmits(["toggle-locale"]);
 const navRef = ref(null);
 const indicatorRef = ref(null);
 
@@ -65,6 +83,12 @@ watch(
   () => moveIndicator()
 );
 
+watch(
+  () => props.navItems,
+  () => moveIndicator(true),
+  { deep: true }
+);
+
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
   removeResizeFallback?.();
@@ -77,12 +101,12 @@ onBeforeUnmount(() => {
     <a class="brand" href="#home">
       <span class="brand-mark">PI</span>
       <span class="brand-copy">
-        <strong>Personal Issue</strong>
-        <small>个人专刊</small>
+        <strong>{{ copy.brandTitle }}</strong>
+        <small>{{ copy.brandSubtitle }}</small>
       </span>
     </a>
 
-    <nav ref="navRef" class="site-nav" aria-label="页面导航">
+    <nav ref="navRef" class="site-nav" :aria-label="copy.navAriaLabel">
       <span ref="indicatorRef" class="nav-indicator" aria-hidden="true" />
 
       <a
@@ -97,8 +121,16 @@ onBeforeUnmount(() => {
       </a>
 
       <RouterLink class="nav-link" to="/admin">
-        后台
+        {{ copy.adminLabel }}
       </RouterLink>
+      <button
+        type="button"
+        class="nav-link nav-language-toggle"
+        :aria-label="languageToggleAriaLabel"
+        @click="emit('toggle-locale')"
+      >
+        {{ languageToggleLabel }}
+      </button>
     </nav>
   </header>
 </template>

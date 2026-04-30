@@ -45,10 +45,24 @@
 - `Skills`：Three.js 技能宇宙、技能节点联动、核心块和技能卡片
 - `Projects`：项目 tab、详情抽屉切换和信号卡
 - `Contact`：联系方式展示、复制/发送保护
+- 顶部导航支持中文 / 英文切换，默认展示中文版本
 
 对应目录：
 
 - [src/components/sections](./src/components/sections)
+
+### 中英文切换
+
+前台展示层内置了中文和英文两套文案。默认语言为中文，顶部导航右侧的 `EN` / `中文` 按钮可以即时切换版本，选择会写入 `localStorage`，刷新后保持上一次语言。
+
+为了不增加后台内容管理的复杂度，中英文切换目前放在前台展示层处理：后台仍维护单份 `server/data/profile.json`，前台通过本地化映射生成当前语言的展示内容。
+
+相关文件：
+
+- [src/composables/useLocale.js](./src/composables/useLocale.js)
+- [src/i18n/profileLocale.js](./src/i18n/profileLocale.js)
+- [src/views/ProfilePage.vue](./src/views/ProfilePage.vue)
+- [src/components/layout/SiteHeader.vue](./src/components/layout/SiteHeader.vue)
 
 ### 后台内容管理
 
@@ -164,7 +178,7 @@
 
 如果还想继续降负载，可以再考虑：
 
-- 关闭 [src/composables/usePointerGlow.js](./src/composables/usePointerGlow.js)
+- 保持 [src/composables/usePointerGlow.js](./src/composables/usePointerGlow.js) 不启用，避免低存在感但持续运行的指针光效
 - 简化 [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js) 的滚动动画
 - 关闭或降级 [src/components/visuals/HeroSignalCoreScene.vue](./src/components/visuals/HeroSignalCoreScene.vue) 的 Hero 粒子核心
 - 关闭或降级 [src/components/visuals/SkillUniverseScene.vue](./src/components/visuals/SkillUniverseScene.vue) 的 Three.js 星图

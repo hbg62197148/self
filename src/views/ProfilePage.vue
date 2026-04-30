@@ -15,60 +15,47 @@ import SkillsSection from "../components/sections/SkillsSection.vue";
 import { useActiveSection } from "../composables/useActiveSection";
 import { useClipboard } from "../composables/useClipboard";
 import { useLoadingGate } from "../composables/useLoadingGate";
+import { useLocale } from "../composables/useLocale";
 import { useProfileContent } from "../composables/useProfileContent";
 import { useProtectedContactAction } from "../composables/useProtectedContactAction";
 import { useRevealOnScroll } from "../composables/useRevealOnScroll";
 import { useSectionTransitionMotion } from "../composables/useSectionTransitionMotion";
 import { useSurfaceMotion } from "../composables/useSurfaceMotion";
+import { buildLocalizedProfile, getSiteCopy } from "../i18n/profileLocale";
 
-const navItems = [
-  { id: "home", label: "Home" },
-  { id: "identity", label: "Identity" },
-  { id: "about", label: "About" },
-  { id: "skills", label: "Skill Universe" },
-  { id: "projects", label: "Chapters" },
-  { id: "contact", label: "Contact" }
-];
-
-const sectionMeta = {
+const sectionToneMeta = {
   home: {
     index: "01",
-    label: "Opening Signal",
     tone: "#ff6a3d",
     glow: "rgba(255, 106, 61, 0.24)",
     glowSoft: "rgba(255, 106, 61, 0.12)"
   },
   identity: {
     index: "02",
-    label: "Identity Breakdown",
     tone: "#f6c85f",
     glow: "rgba(246, 200, 95, 0.22)",
     glowSoft: "rgba(246, 200, 95, 0.1)"
   },
   about: {
     index: "03",
-    label: "Profile Interior",
     tone: "#7bf7d4",
     glow: "rgba(123, 247, 212, 0.22)",
     glowSoft: "rgba(123, 247, 212, 0.1)"
   },
   skills: {
     index: "04",
-    label: "Skill Universe",
     tone: "#9ea9ff",
     glow: "rgba(158, 169, 255, 0.24)",
     glowSoft: "rgba(158, 169, 255, 0.11)"
   },
   projects: {
     index: "05",
-    label: "Selected Chapters",
     tone: "#ff8cb7",
     glow: "rgba(255, 140, 183, 0.22)",
     glowSoft: "rgba(255, 140, 183, 0.1)"
   },
   contact: {
     index: "06",
-    label: "Contact Finale",
     tone: "#69d2ff",
     glow: "rgba(105, 210, 255, 0.24)",
     glowSoft: "rgba(105, 210, 255, 0.1)"
@@ -80,6 +67,7 @@ const activeQuestionId = ref("");
 const activeProjectId = ref("");
 const { loading: introLoading } = useLoadingGate();
 const { activeSection } = useActiveSection();
+const { locale, toggleLocale, toggleLabel, toggleAriaLabel } = useLocale();
 const { copiedLabel, copyToClipboard } = useClipboard();
 const { profile, loading: profileLoading } = useProfileContent({ pollMs: 30000 });
 const {
@@ -94,10 +82,15 @@ const {
   refreshChallenge: refreshProtectedContactChallenge,
   notifyGuardEditing,
   closeDialog: closeProtectedContactDialog
-} = useProtectedContactAction(async (item) => {
+} = useProtectedContactAction(async (resolvedItem, requestedItem) => {
+  const item = {
+    ...resolvedItem,
+    displayLabel: requestedItem?.displayLabel
+  };
+
   // 验证通过后，再执行真正的复制或发送动作。
   if (item.copy) {
-    await copyToClipboard(item.value, item.label);
+    await copyToClipboard(item.value, item.displayLabel ?? item.label);
     return;
   }
 
@@ -107,7 +100,21 @@ const {
 });
 
 // 根据当前章节切换整页氛围色。
-const activeMeta = computed(() => sectionMeta[activeSection.value] ?? sectionMeta.home);
+const localeCopy = computed(() => getSiteCopy(locale.value));
+const navItems = computed(() => localeCopy.value.navItems);
+const localizedProfile = computed(() => buildLocalizedProfile(profile.value, locale.value));
+const sectionMeta = computed(() =>
+  Object.fromEntries(
+    Object.entries(sectionToneMeta).map(([id, meta]) => [
+      id,
+      {
+        ...meta,
+        label: localeCopy.value.sectionMeta[id] ?? id
+      }
+    ])
+  )
+);
+const activeMeta = computed(() => sectionMeta.value[activeSection.value] ?? sectionMeta.value.home);
 const appShellStyle = computed(() => ({
   "--active-tone": activeMeta.value.tone,
   "--active-glow": activeMeta.value.glow,
@@ -117,12 +124,12 @@ const currentYear = new Date().getFullYear();
 const showLoading = computed(() => introLoading.value || profileLoading.value);
 const activeQuestion = computed(
   () =>
-    profile.value.questions.find((item) => item.id === activeQuestionId.value) ??
-    profile.value.questions[0] ?? { id: "", prompt: "", answer: "" }
+    localizedProfile.value.questions.find((item) => item.id === activeQuestionId.value) ??
+    localizedProfile.value.questions[0] ?? { id: "", prompt: "", answer: "" }
 );
 
 watch(
-  () => profile.value.questions,
+  () => localizedProfile.value.questions,
   (questions) => {
     if (!questions.some((item) => item.id === activeQuestionId.value)) {
       activeQuestionId.value = questions[0]?.id ?? "";
@@ -132,7 +139,7 @@ watch(
 );
 
 watch(
-  () => profile.value.projects.items,
+  () => localizedProfile.value.projects.items,
   (items) => {
     if (!items.some((item) => item.id === activeProjectId.value)) {
       activeProjectId.value = items[0]?.id ?? "";
@@ -148,7 +155,7 @@ useSurfaceMotion();
 
 <template>
   <div class="app-shell" :style="appShellStyle">
-    <LoadingScreen :loading="showLoading" :edition="profile.edition" />
+    <LoadingScreen :loading="showLoading" :edition="localizedProfile.edition" :copy="localeCopy.loading" />
 
     <div class="background-noise" aria-hidden="true" />
 
@@ -156,32 +163,45 @@ useSurfaceMotion();
 
     <MotionControlOrb />
 
-    <SiteHeader :nav-items="navItems" :active-section="activeSection" />
+    <SiteHeader
+      :nav-items="navItems"
+      :active-section="activeSection"
+      :copy="localeCopy.header"
+      :language-toggle-label="toggleLabel"
+      :language-toggle-aria-label="toggleAriaLabel"
+      @toggle-locale="toggleLocale"
+    />
 
     <main class="page-content">
-      <HeroSection :hero="profile.hero" :name-cn="profile.nameCn" :name-en="profile.nameEn" :role="profile.role" />
-      <IdentitySection :deconstruction="profile.deconstruction" />
+      <HeroSection
+        :hero="localizedProfile.hero"
+        :name-cn="localizedProfile.nameCn"
+        :name-en="localizedProfile.nameEn"
+        :role="localizedProfile.role"
+      />
+      <IdentitySection :deconstruction="localizedProfile.deconstruction" />
       <AboutSection
-        :about="profile.about"
-        :questions="profile.questions"
+        :about="localizedProfile.about"
+        :questions="localizedProfile.questions"
         :active-question="activeQuestion"
         @update:active-question="activeQuestionId = $event.id"
       />
-      <SkillsSection :skills="profile.skills" />
+      <SkillsSection :skills="localizedProfile.skills" />
       <ProjectsSection
-        :projects="profile.projects"
+        :projects="localizedProfile.projects"
         :active-project-id="activeProjectId"
         @update:active-project-id="activeProjectId = $event"
       />
       <ContactSection
-        :contact="profile.contact"
+        :contact="localizedProfile.contact"
         :copied-label="copiedLabel"
+        :copied-text="localeCopy.copied"
         @copy="copyToClipboard"
         @protected-action="openProtectedContactDialog"
       />
     </main>
 
-    <SiteFooter :current-year="currentYear" />
+    <SiteFooter :current-year="currentYear" :copy="localeCopy.footer" />
 
     <ContactCaptchaDialog
       :visible="contactGuardVisible"
@@ -190,6 +210,7 @@ useSurfaceMotion();
       :submitting="guardSubmitting"
       :error-message="guardErrorMessage"
       :guard-mood="guardMood"
+      :copy="localeCopy.captcha"
       @close="closeProtectedContactDialog"
       @submit="submitProtectedContactAnswer"
       @refresh="refreshProtectedContactChallenge"

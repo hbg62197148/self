@@ -87,7 +87,7 @@ const {
           :style="{ '--core-tone': activeLink?.tone ?? 'rgba(255, 106, 61, 0.42)' }"
         >
           <div :class="['universe-core', { 'is-linked': activeLink, 'is-pulsing': isCorePulsing }]">
-            <span>Core System</span>
+            <span>{{ skills.coreLabel ?? "Core System" }}</span>
             <strong>{{ skills.core }}</strong>
             <p>{{ skills.coreNote }}</p>
           </div>

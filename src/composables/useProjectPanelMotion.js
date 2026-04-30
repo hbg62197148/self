@@ -233,8 +233,9 @@ export function useProjectPanelMotion(displayedProject) {
   const switchProject = async (nextProject, sourceElement = null) => {
     const currentTargets = collectTargets();
     const currentToken = ++switchToken;
+    const panel = detailPanelRef.value;
 
-    if (!initialized || !currentTargets || !displayedProject.value) {
+    if (!initialized || !currentTargets || !displayedProject.value || !panel || panel.offsetParent === null) {
       displayedProject.value = nextProject;
       await nextTick();
       setSettledState();

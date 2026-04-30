@@ -110,7 +110,7 @@ const {
       </Staged>
 
       <Staged as="aside" class="hero-sidecard" :order="6">
-        <p class="mini-label">Profile Pulse</p>
+        <p class="mini-label">{{ hero.profilePulseLabel ?? "Profile Pulse" }}</p>
         <h2>{{ role }}</h2>
         <p class="hero-summary">{{ hero.summary }}</p>
 

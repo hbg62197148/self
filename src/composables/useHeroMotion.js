@@ -461,10 +461,12 @@ export function useHeroMotion() {
       return;
     }
 
-    const chars = [...title.querySelectorAll(".hero-char")];
+    const handleOver = (event) => {
+      const char = event.target?.closest?.(".hero-char");
 
-    const handleEnter = (event) => {
-      const char = event.currentTarget;
+      if (!char || !title.contains(char) || char.contains(event.relatedTarget)) {
+        return;
+      }
 
       gsap.killTweensOf(char);
       gsap
@@ -485,14 +487,10 @@ export function useHeroMotion() {
         });
     };
 
-    chars.forEach((char) => {
-      char.addEventListener("pointerenter", handleEnter);
-    });
+    title.addEventListener("pointerover", handleOver);
 
     removeTitleEvents = () => {
-      chars.forEach((char) => {
-        char.removeEventListener("pointerenter", handleEnter);
-      });
+      title.removeEventListener("pointerover", handleOver);
     };
   };
 

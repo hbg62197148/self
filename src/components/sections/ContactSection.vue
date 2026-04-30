@@ -10,6 +10,10 @@ defineProps({
   copiedLabel: {
     type: String,
     default: null
+  },
+  copiedText: {
+    type: String,
+    default: "Copied"
   }
 });
 
@@ -17,10 +21,12 @@ const emit = defineEmits(["copy", "protected-action"]);
 
 // 只有外部跳转才需要打开新标签页。
 const isExternalLink = (href) => Boolean(href) && /^(https?:|mailto:)/.test(href);
+const getItemLabel = (item) => item.displayLabel ?? item.label;
+const getActionLabel = (item) => item.displayAction ?? item.action;
 
 // 复制动作交回页面级逻辑统一处理。
 const handleCopy = (item) => {
-  emit("copy", item.value, item.label);
+  emit("copy", item.value, getItemLabel(item));
 };
 
 // 前台展示时对受保护联系方式做脱敏，避免直接暴露真实信息。
@@ -74,7 +80,7 @@ const handleProtectedAction = (item) => {
           class="contact-card panel-inset"
           :order="3 + index"
         >
-          <span>{{ item.label }}</span>
+          <span>{{ getItemLabel(item) }}</span>
           <strong>{{ getDisplayValue(item) }}</strong>
           <button
             v-if="item.copy && !item.protected"
@@ -82,7 +88,7 @@ const handleProtectedAction = (item) => {
             class="contact-action"
             @click="handleCopy(item)"
           >
-            {{ copiedLabel === item.label ? "Copied" : item.action }}
+            {{ copiedLabel === getItemLabel(item) ? copiedText : getActionLabel(item) }}
           </button>
           <button
             v-else-if="item.protected"
@@ -90,7 +96,7 @@ const handleProtectedAction = (item) => {
             class="contact-action"
             @click="handleProtectedAction(item)"
           >
-            {{ item.action }}
+            {{ getActionLabel(item) }}
           </button>
           <a
             v-else
@@ -99,7 +105,7 @@ const handleProtectedAction = (item) => {
             :target="isExternalLink(item.href) ? '_blank' : undefined"
             :rel="isExternalLink(item.href) ? 'noreferrer' : undefined"
           >
-            {{ item.action }}
+            {{ getActionLabel(item) }}
           </a>
         </Staged>
       </div>

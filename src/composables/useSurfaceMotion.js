@@ -52,8 +52,8 @@ export function useSurfaceMotion() {
 
     const moveX = gsap.quickTo(surface, "x", { duration: 0.28, ease: "power3.out" });
     const moveY = gsap.quickTo(surface, "y", { duration: 0.28, ease: "power3.out" });
-    const rotateX = gsap.quickTo(surface, "rotateX", { duration: 0.34, ease: "power3.out" });
-    const rotateY = gsap.quickTo(surface, "rotateY", { duration: 0.34, ease: "power3.out" });
+    const rotateX = gsap.quickTo(surface, "rotationX", { duration: 0.34, ease: "power3.out" });
+    const rotateY = gsap.quickTo(surface, "rotationY", { duration: 0.34, ease: "power3.out" });
     const spotX = gsap.quickTo(spotlight, "x", { duration: 0.22, ease: "power3.out" });
     const spotY = gsap.quickTo(spotlight, "y", { duration: 0.22, ease: "power3.out" });
 
@@ -162,7 +162,7 @@ export function useSurfaceMotion() {
       surface.removeEventListener("focusout", handleLeave);
       gsap.killTweensOf([surface, spotlight]);
       gsap.set(surface, {
-        clearProps: "x,y,rotateX,rotateY,scale,transformPerspective,transformOrigin"
+        clearProps: "transform,transformPerspective,transformOrigin"
       });
       spotlight.remove();
       surface.classList.remove("surface-motion", "is-surface-active");
