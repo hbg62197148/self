@@ -414,7 +414,7 @@ const localizedProfiles = {
       title: "如果你觉得我的方向合适，欢迎直接联系我。",
       copy: "我目前在开放求职状态，也欢迎围绕前端开发、作品集页面、产品展示和创意型网页表达进行交流或合作。",
       display: "一起做清晰、有冲击力、真正有用的东西。",
-      intro: "下面是我目前常用的联系方式。如果你有合适的岗位、项目或合作想法，可以直接发邮件，或者先通过微信和 GitHub 找到我。",
+      intro: "下面是我目前常用的联系方式。如果有合适的岗位、项目或合作想法，可以直接发邮件，或者先通过微信和 GitHub 找到我。",
       items: [
         {
           displayLabel: "邮箱",
@@ -572,7 +572,7 @@ const localizedProfiles = {
       {
         id: "next",
         prompt: "How could this page grow next?",
-        answer: "This page can grow into a fuller personal site with project detail pages, writing, hiring information, an English version, or a more convenient content setup. This version builds the identity expression and core entry points first, with enough room to extend."
+        answer: "This page can grow into a fuller personal site with project detail pages, writing, hiring information, or a more convenient content setup. This version builds the identity expression and core entry points first, with enough room to extend."
       }
     ],
     skills: {
@@ -751,7 +751,7 @@ const localizedProfiles = {
       title: "If my direction feels right, feel free to reach out.",
       copy: "I am currently open to job opportunities and conversations around frontend development, portfolio pages, product showcases, and expressive web experiences.",
       display: "LET'S BUILD SOMETHING CLEAR, STRIKING, AND USEFUL.",
-      intro: "These are the channels I use most often. If you have a fitting role, project, or collaboration idea, you can email me directly or find me through WeChat and GitHub first.",
+      intro: "These are the channels I use most often. If there has a fitting role, project, or collaboration idea, you can email me directly or find me through WeChat and GitHub first.",
       items: [
         {
           displayLabel: "Email",
