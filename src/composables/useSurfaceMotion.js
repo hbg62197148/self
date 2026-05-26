@@ -1,17 +1,8 @@
 import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
-import { gsap } from "gsap";
+import { gsap } from "../lib/gsap";
 import { useMotionPreference } from "./useMotionPreference";
 
-const SURFACE_SELECTOR = [
-  ".stat-card",
-  ".fact-card",
-  ".question-button",
-  ".answer-stage",
-  ".skill-card",
-  ".project-tab",
-  ".contact-display",
-  ".contact-card"
-].join(", ");
+const SURFACE_SELECTOR = ".project-tab";
 
 const SPOTLIGHT_SIZE = 190;
 

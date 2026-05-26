@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { gsap } from "gsap";
+import { gsap } from "../../lib/gsap";
 
 const props = defineProps({
   mood: {

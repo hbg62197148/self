@@ -1,5 +1,5 @@
 import { nextTick, onBeforeUnmount } from "vue";
-import { gsap } from "gsap";
+import { gsap } from "../lib/gsap";
 
 const MAX_ROW_SHIFT = 12;
 

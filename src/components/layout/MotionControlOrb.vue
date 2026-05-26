@@ -1,6 +1,14 @@
-  <script setup>
+<script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useMotionPreference } from "../../composables/useMotionPreference";
+
+const props = defineProps({
+  variant: {
+    type: String,
+    default: "fixed",
+    validator: (value) => ["fixed", "inline"].includes(value)
+  }
+});
 
 const { isMotionLite, motionModeLabel, toggleMotionMode } = useMotionPreference();
 
@@ -16,6 +24,7 @@ const orbRef = ref(null);
 const isDragging = ref(false);
 const isPositionReady = ref(false);
 const orbPosition = ref({ left: DESKTOP_EDGE_GAP, top: 0 });
+const isFixedVariant = computed(() => props.variant === "fixed");
 const dragState = {
   pointerId: null,
   offsetX: 0,
@@ -26,6 +35,10 @@ const dragState = {
 let shouldSkipNextClick = false;
 
 const orbStyle = computed(() => {
+  if (!isFixedVariant.value) {
+    return {};
+  }
+
   if (!isPositionReady.value) {
     return {};
   }
@@ -136,6 +149,10 @@ function moveOrbWithPointer(event) {
 }
 
 function handlePointerDown(event) {
+  if (!isFixedVariant.value) {
+    return;
+  }
+
   if (event.button !== undefined && event.button !== 0) {
     return;
   }
@@ -156,6 +173,10 @@ function handlePointerDown(event) {
 }
 
 function handlePointerMove(event) {
+  if (!isFixedVariant.value) {
+    return;
+  }
+
   if (!isDragging.value || event.pointerId !== dragState.pointerId) {
     return;
   }
@@ -164,6 +185,10 @@ function handlePointerMove(event) {
 }
 
 function finishDrag(event) {
+  if (!isFixedVariant.value) {
+    return;
+  }
+
   if (!isDragging.value || event.pointerId !== dragState.pointerId) {
     return;
   }
@@ -191,6 +216,11 @@ function handleResize() {
 }
 
 onMounted(() => {
+  if (!isFixedVariant.value) {
+    isPositionReady.value = true;
+    return;
+  }
+
   restorePosition();
   isPositionReady.value = true;
   window.addEventListener("resize", handleResize);
@@ -205,7 +235,11 @@ onBeforeUnmount(() => {
   <button
     ref="orbRef"
     type="button"
-    :class="['motion-orb', { 'is-lite': isMotionLite, 'is-dragging': isDragging }]"
+    :class="[
+      'motion-orb',
+      `motion-orb--${props.variant}`,
+      { 'is-lite': isMotionLite, 'is-dragging': isDragging }
+    ]"
     :style="orbStyle"
     :aria-pressed="isMotionLite"
     :aria-label="motionModeLabel"

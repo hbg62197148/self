@@ -1,5 +1,5 @@
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { gsap } from "gsap";
+import { gsap } from "../lib/gsap";
 import { useMotionPreference } from "./useMotionPreference";
 
 const FRAME_PADDING = 16;

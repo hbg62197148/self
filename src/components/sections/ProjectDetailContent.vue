@@ -9,12 +9,19 @@ defineProps({
 
 <template>
   <div class="project-detail-content">
-    <div class="project-detail-head">
-      <div>
-        <p class="mini-label">{{ project.category }}</p>
-        <h3>{{ project.title }}</h3>
+    <div class="project-preview" :style="{ '--project-tone-step': project.index }" aria-hidden="true">
+      <div class="project-preview-window">
+        <span class="project-preview-browser-bar" />
+        <div class="project-preview-hero">
+          <span class="project-preview-kicker">{{ project.category }}</span>
+          <strong>{{ project.index }}</strong>
+        </div>
+        <div class="project-preview-grid">
+          <span v-for="item in project.signals" :key="item.label" />
+        </div>
       </div>
-      <span class="detail-index">{{ project.index }}</span>
+      <div class="project-preview-panel project-preview-panel-a" />
+      <div class="project-preview-panel project-preview-panel-b" />
     </div>
 
     <p class="project-description">{{ project.description }}</p>

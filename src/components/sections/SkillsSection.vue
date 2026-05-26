@@ -9,10 +9,15 @@ const props = defineProps({
   skills: {
     type: Object,
     required: true
+  },
+  projects: {
+    type: Object,
+    default: () => ({ items: [] })
   }
 });
 
 const skillNodes = computed(() => props.skills.nodes ?? []);
+const normalize = (value) => String(value ?? "").toLowerCase();
 
 const {
   activeLink,
@@ -23,6 +28,49 @@ const {
   setActiveNode,
   activateNode
 } = useSkillUniverse(skillNodes);
+
+const activeNode = computed(() => resolvedNodes.value.find((node) => node.id === activeNodeId.value) ?? null);
+const evidenceTitle = computed(() => activeNode.value?.label ?? props.skills.evidenceLabel ?? "Project Evidence");
+const evidenceSubtitle = computed(() =>
+  activeNode.value
+    ? `${activeNode.value.detail} / ${activeNode.value.label}`
+    : props.skills.evidenceCopy ?? "Case-backed skill map"
+);
+const evidenceItems = computed(() => {
+  const projects = props.projects.items ?? [];
+
+  if (!projects.length) {
+    return [];
+  }
+
+  const terms = activeNode.value ? [activeNode.value.label, activeNode.value.detail].map(normalize) : [];
+  const scoredProjects = projects.map((project, index) => {
+    const searchableText = normalize(
+      [
+        project.category,
+        project.title,
+        project.subtitle,
+        project.description,
+        ...(project.stack ?? []),
+        ...(project.details ?? []),
+        ...(project.signals ?? []).flatMap((item) => [item.label, item.value])
+      ].join(" ")
+    );
+    const score = terms.reduce((total, term) => total + (term && searchableText.includes(term) ? 1 : 0), 0);
+
+    return { project, score, index };
+  });
+
+  return scoredProjects
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, 2)
+    .map(({ project }) => ({
+      id: project.id,
+      category: project.category,
+      title: project.title,
+      signal: project.signals?.[0]?.value ?? project.subtitle
+    }));
+});
 </script>
 
 <template>
@@ -122,12 +170,24 @@ const {
       </Staged>
 
       <div class="skills-column">
+        <Staged as="article" class="skill-evidence-card panel-inset" :order="3">
+          <p class="mini-label">{{ evidenceTitle }}</p>
+          <h3>{{ evidenceSubtitle }}</h3>
+          <div class="skill-evidence-list">
+            <article v-for="item in evidenceItems" :key="item.id" class="skill-evidence-item">
+              <span>{{ item.category }}</span>
+              <strong>{{ item.title }}</strong>
+              <small>{{ item.signal }}</small>
+            </article>
+          </div>
+        </Staged>
+
         <Staged
           v-for="(group, index) in skills.groups"
           :key="group.title"
           as="article"
           class="skill-card panel-inset"
-          :order="3 + index"
+          :order="4 + index"
         >
           <h3>{{ group.title }}</h3>
           <p>{{ group.note }}</p>

@@ -47,6 +47,7 @@ let coreGroup = null;
 let coreGlowMaterial = null;
 let coreInnerMaterial = null;
 let resizeObserver = null;
+let visibilityObserver = null;
 let animationFrameId = 0;
 let pulseStartedAt = 0;
 let sceneStartedAt = 0;
@@ -54,6 +55,7 @@ let worldWidth = 100;
 let worldHeight = 100;
 let THREE = null;
 let isDisposed = false;
+let sceneInitStarted = false;
 
 const nodeRecords = new Map();
 const linkRecords = new Map();
@@ -602,7 +604,43 @@ const initScene = async () => {
   }
 };
 
-onMounted(initScene);
+const startSceneWhenVisible = () => {
+  if (sceneInitStarted) {
+    return;
+  }
+
+  sceneInitStarted = true;
+  initScene();
+};
+
+const observeSceneVisibility = () => {
+  if (!("IntersectionObserver" in window) || !containerRef.value) {
+    startSceneWhenVisible();
+    return;
+  }
+
+  visibilityObserver = new IntersectionObserver(
+    (entries) => {
+      const shouldStart = entries.some((entry) => entry.isIntersecting || entry.intersectionRatio > 0);
+
+      if (!shouldStart) {
+        return;
+      }
+
+      visibilityObserver?.disconnect();
+      visibilityObserver = null;
+      startSceneWhenVisible();
+    },
+    {
+      rootMargin: "420px 0px",
+      threshold: 0.01
+    }
+  );
+
+  visibilityObserver.observe(containerRef.value);
+};
+
+onMounted(observeSceneVisibility);
 
 watch(
   () =>
@@ -649,6 +687,8 @@ watch(
 onBeforeUnmount(() => {
   isDisposed = true;
   stopAnimation();
+  visibilityObserver?.disconnect();
+  visibilityObserver = null;
   resizeObserver?.disconnect();
   resizeObserver = null;
   clearSceneContent();

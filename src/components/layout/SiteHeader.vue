@@ -1,7 +1,8 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
-import { gsap } from "gsap";
+import { gsap } from "../../lib/gsap";
+import MotionControlOrb from "./MotionControlOrb.vue";
 
 const props = defineProps({
   navItems: {
@@ -131,6 +132,7 @@ onBeforeUnmount(() => {
       >
         {{ languageToggleLabel }}
       </button>
+      <MotionControlOrb variant="inline" />
     </nav>
   </header>
 </template>

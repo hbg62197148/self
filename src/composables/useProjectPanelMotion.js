@@ -1,5 +1,5 @@
 import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
-import { gsap } from "gsap";
+import { gsap } from "../lib/gsap";
 
 export function useProjectPanelMotion(displayedProject) {
   const detailPanelRef = ref(null);
@@ -21,6 +21,8 @@ export function useProjectPanelMotion(displayedProject) {
     return {
       root,
       headItems: [...root.querySelectorAll(".project-detail-head > *")],
+      preview: root.querySelector(".project-preview"),
+      previewParts: [...root.querySelectorAll(".project-preview-window, .project-preview-panel")],
       description: root.querySelector(".project-description"),
       signalCards: [...root.querySelectorAll(".signal-card-project")],
       stackChips: [...root.querySelectorAll(".stack-row .tag-chip")],
@@ -46,6 +48,8 @@ export function useProjectPanelMotion(displayedProject) {
     gsap.set(
       [
         ...targets.headItems,
+        targets.preview,
+        ...targets.previewParts,
         targets.description,
         ...targets.signalCards,
         ...targets.stackChips,
@@ -164,6 +168,19 @@ export function useProjectPanelMotion(displayedProject) {
       y: 14
     });
 
+    gsap.set(targets.preview, {
+      autoAlpha: 0,
+      y: 18,
+      scale: 0.985,
+      filter: "blur(10px)"
+    });
+
+    gsap.set(targets.previewParts, {
+      autoAlpha: 0,
+      y: 12,
+      scale: 0.96
+    });
+
     gsap.set(targets.signalCards, {
       autoAlpha: 0,
       y: 18,
@@ -208,6 +225,20 @@ export function useProjectPanelMotion(displayedProject) {
         y: 0,
         duration: 0.3
       }, 0.14)
+      .to(targets.preview, {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        filter: "blur(0px)",
+        duration: 0.42
+      }, 0.16)
+      .to(targets.previewParts, {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.32,
+        stagger: 0.055
+      }, 0.2)
       .to(targets.signalCards, {
         autoAlpha: 1,
         y: 0,
