@@ -1,16 +1,25 @@
+import "dotenv/config";
 import express from "express";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  changeAdminPassword,
   clearAdminSession,
+  ensureDefaultAdmin,
   getAdminSession,
   loginAdmin,
   requireAdminSession,
   setAdminSessionCookie
 } from "./services/adminAuth.js";
 import { createContactChallenge, verifyContactChallenge } from "./services/contactProtection.js";
-import { readProfile, writeProfile } from "./services/profileStore.js";
+import {
+  getDraftProfile,
+  getPublishedProfile,
+  listProfileVersions,
+  publishProfile,
+  saveDraftProfile
+} from "./services/profileStore.js";
 import { sanitizeProfileForPublic } from "./services/publicProfile.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,6 +28,8 @@ const rootDir = path.resolve(__dirname, "..");
 const distDir = path.join(rootDir, "dist");
 const app = express();
 const port = Number(process.env.PORT) || 3001;
+
+ensureDefaultAdmin();
 
 app.use(express.json({ limit: "2mb" }));
 
@@ -75,10 +86,53 @@ app.post("/api/admin/logout", (request, response) => {
   });
 });
 
+app.post("/api/admin/change-password", requireAdminSession, (request, response) => {
+  const currentPassword = request.body?.currentPassword ?? "";
+  const nextPassword = request.body?.newPassword ?? "";
+
+  if (!currentPassword || !nextPassword) {
+    response.status(400).json({
+      message: "请输入当前密码和新密码。"
+    });
+    return;
+  }
+
+  if (nextPassword.length < 8) {
+    response.status(400).json({
+      message: "新密码至少需要 8 位。"
+    });
+    return;
+  }
+
+  if (currentPassword === nextPassword) {
+    response.status(400).json({
+      message: "新密码不能和当前密码相同。"
+    });
+    return;
+  }
+
+  const changed = changeAdminPassword(request.adminSession.username, currentPassword, nextPassword);
+
+  if (!changed) {
+    response.status(400).json({
+      message: "当前密码不正确。"
+    });
+    return;
+  }
+
+  clearAdminSession(request, response);
+  response.json({
+    message: "密码已修改，请重新登录。",
+    data: {
+      username: request.adminSession.username
+    }
+  });
+});
+
 app.post("/api/contact/challenge", async (request, response) => {
   try {
     const label = request.body?.label?.trim?.() ?? "";
-    const profile = await readProfile();
+    const profile = getPublishedProfile();
     const challenge = createContactChallenge(profile, label);
 
     if (!challenge) {
@@ -104,7 +158,7 @@ app.post("/api/contact/access", async (request, response) => {
     const label = request.body?.label?.trim?.() ?? "";
     const answer = request.body?.answer ?? "";
     const challengeId = request.body?.challengeId ?? "";
-    const profile = await readProfile();
+    const profile = getPublishedProfile();
     const result = verifyContactChallenge(profile, challengeId, label, answer);
 
     if (!result.success) {
@@ -125,13 +179,10 @@ app.post("/api/contact/access", async (request, response) => {
   }
 });
 
-app.get("/api/profile", async (request, response) => {
+app.get("/api/profile", (request, response) => {
   try {
-    const profile = await readProfile();
-    const session = getAdminSession(request);
-
     response.json({
-      data: session ? profile : sanitizeProfileForPublic(profile)
+      data: sanitizeProfileForPublic(getPublishedProfile())
     });
   } catch (error) {
     response.status(500).json({
@@ -141,16 +192,55 @@ app.get("/api/profile", async (request, response) => {
   }
 });
 
-app.put("/api/profile", requireAdminSession, async (request, response) => {
+app.get("/api/admin/profile/draft", requireAdminSession, (request, response) => {
   try {
-    const profile = await writeProfile(request.body);
     response.json({
-      message: "内容已发布",
-      data: profile
+      data: getDraftProfile()
     });
   } catch (error) {
     response.status(500).json({
-      message: "保存内容失败",
+      message: "读取草稿失败",
+      error: error instanceof Error ? error.message : "未知错误"
+    });
+  }
+});
+
+app.put("/api/admin/profile/draft", requireAdminSession, (request, response) => {
+  try {
+    response.json({
+      message: "草稿已保存",
+      data: saveDraftProfile(request.body)
+    });
+  } catch (error) {
+    response.status(500).json({
+      message: "保存草稿失败",
+      error: error instanceof Error ? error.message : "未知错误"
+    });
+  }
+});
+
+app.post("/api/admin/profile/publish", requireAdminSession, (request, response) => {
+  try {
+    response.json({
+      message: "内容已发布",
+      data: publishProfile(request.body)
+    });
+  } catch (error) {
+    response.status(500).json({
+      message: "发布失败",
+      error: error instanceof Error ? error.message : "未知错误"
+    });
+  }
+});
+
+app.get("/api/admin/profile/versions", requireAdminSession, (request, response) => {
+  try {
+    response.json({
+      data: listProfileVersions()
+    });
+  } catch (error) {
+    response.status(500).json({
+      message: "读取历史版本失败",
       error: error instanceof Error ? error.message : "未知错误"
     });
   }

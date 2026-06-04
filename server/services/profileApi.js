@@ -14,9 +14,7 @@ async function requestJson(url, options = {}) {
     try {
       const payload = await response.json();
       errorMessage = payload.message ?? errorMessage;
-    } catch {
-      // 接口没有返回 JSON 时，保留默认错误文案即可。
-    }
+    } catch {}
 
     const error = new Error(errorMessage);
     error.status = response.status;

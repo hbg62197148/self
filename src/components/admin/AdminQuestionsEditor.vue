@@ -46,7 +46,7 @@ const removeQuestion = (index) => {
           <textarea v-model="item.answer" class="admin-textarea" rows="4"></textarea>
         </label>
 
-        <button type="button" class="admin-remove" @click="removeQuestion(index)">删除问题</button>
+        <button type="button" class="admin-remove admin-spaced-action" @click="removeQuestion(index)">删除问题</button>
       </article>
     </div>
   </div>

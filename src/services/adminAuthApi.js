@@ -46,3 +46,12 @@ export async function logoutAdmin() {
     method: "POST"
   });
 }
+
+export async function changeAdminPassword(passwords) {
+  const payload = await requestJson("/api/admin/change-password", {
+    method: "POST",
+    body: JSON.stringify(passwords)
+  });
+
+  return payload.data;
+}

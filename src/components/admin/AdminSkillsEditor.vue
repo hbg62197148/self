@@ -99,7 +99,7 @@ const removeGroupItem = (group, index) => {
               <input v-model="item.y" class="admin-input" type="text">
             </label>
           </div>
-          <button type="button" class="admin-remove" @click="removeNode(index)">删除节点</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeNode(index)">删除节点</button>
         </article>
       </div>
     </div>
@@ -125,7 +125,7 @@ const removeGroupItem = (group, index) => {
           <div class="admin-group">
             <div class="admin-group-head">
               <strong>分组条目</strong>
-              <button type="button" class="admin-add" @click="addGroupItem(group)">新增条目</button>
+              <button type="button" class="admin-add admin-spaced-action" @click="addGroupItem(group)">新增条目</button>
             </div>
             <div class="admin-repeat-list">
               <div v-for="(item, itemIndex) in group.items" :key="`${item}-${itemIndex}`" class="admin-inline-row">
@@ -135,7 +135,7 @@ const removeGroupItem = (group, index) => {
             </div>
           </div>
 
-          <button type="button" class="admin-remove" @click="removeGroup(groupIndex)">删除分组</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeGroup(groupIndex)">删除分组</button>
         </article>
       </div>
     </div>

@@ -1,9 +1,7 @@
 <script setup>
-import { ref } from "vue";
-import { useSplitTextReveal } from "../composables/useSplitTextReveal";
 import Staged from "./Staged.vue";
 
-const props = defineProps({
+defineProps({
   issue: {
     type: String,
     default: ""
@@ -17,14 +15,10 @@ const props = defineProps({
     default: ""
   }
 });
-
-const headingRef = ref(null);
-
-useSplitTextReveal(headingRef, () => [props.issue, props.title, props.copy]);
 </script>
 
 <template>
-  <header ref="headingRef" class="section-heading">
+  <header class="section-heading">
     <Staged :order="0">
       <p class="section-kicker">{{ issue }}</p>
       <h2 class="section-title">{{ title }}</h2>

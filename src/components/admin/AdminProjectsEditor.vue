@@ -111,7 +111,7 @@ const removeDetail = (project, index) => {
           <div class="admin-group">
             <div class="admin-group-head">
               <strong>信号卡片</strong>
-              <button type="button" class="admin-add" @click="addSignal(project)">新增信号</button>
+              <button type="button" class="admin-add admin-spaced-action" @click="addSignal(project)">新增信号</button>
             </div>
             <div class="admin-card-list">
               <article v-for="(signal, signalIndex) in project.signals" :key="`${signal.label}-${signalIndex}`" class="admin-item-card admin-item-card--subtle">
@@ -125,7 +125,7 @@ const removeDetail = (project, index) => {
                     <input v-model="signal.value" class="admin-input" type="text">
                   </label>
                 </div>
-                <button type="button" class="admin-remove" @click="removeSignal(project, signalIndex)">删除信号</button>
+                <button type="button" class="admin-remove admin-spaced-action" @click="removeSignal(project, signalIndex)">删除信号</button>
               </article>
             </div>
           </div>
@@ -133,7 +133,7 @@ const removeDetail = (project, index) => {
           <div class="admin-group">
             <div class="admin-group-head">
               <strong>技术栈</strong>
-              <button type="button" class="admin-add" @click="addStackItem(project)">新增技术</button>
+              <button type="button" class="admin-add admin-spaced-action" @click="addStackItem(project)">新增技术</button>
             </div>
             <div class="admin-repeat-list">
               <div v-for="(item, itemIndex) in project.stack" :key="`${item}-${itemIndex}`" class="admin-inline-row">
@@ -146,17 +146,17 @@ const removeDetail = (project, index) => {
           <div class="admin-group">
             <div class="admin-group-head">
               <strong>详情段落</strong>
-              <button type="button" class="admin-add" @click="addDetail(project)">新增段落</button>
+              <button type="button" class="admin-add admin-spaced-action" @click="addDetail(project)">新增段落</button>
             </div>
             <div class="admin-repeat-list">
               <div v-for="(item, itemIndex) in project.details" :key="`detail-${itemIndex}`" class="admin-stack">
                 <textarea v-model="project.details[itemIndex]" class="admin-textarea" rows="3"></textarea>
-                <button type="button" class="admin-remove" @click="removeDetail(project, itemIndex)">删除段落</button>
+                <button type="button" class="admin-remove admin-spaced-action" @click="removeDetail(project, itemIndex)">删除段落</button>
               </div>
             </div>
           </div>
 
-          <button type="button" class="admin-remove" @click="removeProject(projectIndex)">删除项目</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeProject(projectIndex)">删除项目</button>
         </article>
       </div>
     </div>

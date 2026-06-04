@@ -347,8 +347,6 @@ html.motion-lite .hero-signal-core-scene {
   filter: saturate(0.86);
 }
 
-html.motion-lite .section-motion-aura,
-html.motion-lite .section-motion-scan,
 html.motion-lite .surface-spotlight,
 html.motion-lite .hero-cta-spotlight {
   display: none !important;
@@ -678,77 +676,56 @@ html.motion-lite .portrait-glow {
   pointer-events: none;
 }
 
-.section > :not(.section-motion-aura):not(.section-motion-scan) {
+.hero > :not(.section-slide-aura),
+.section > :not(.section-slide-aura) {
   position: relative;
   z-index: 1;
 }
 
-.section-motion-aura,
-.section-motion-scan {
-  position: absolute;
-  pointer-events: none;
+.page-content.is-slide-motion {
+  gap: 12px;
 }
 
-.section-motion-aura {
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 18% 12%, var(--active-glow), transparent 32%),
-    linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.055) 38%, transparent 72%);
-  opacity: 0;
-  transform-origin: left center;
-}
-
-.section-motion-scan {
-  top: 24px;
-  bottom: auto;
-  left: 36px;
-  z-index: 0;
-  width: min(280px, 38vw);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--active-glow), rgba(255, 255, 255, 0.42), transparent);
-  filter: blur(0.2px);
-  opacity: 0;
-}
-
-.section.section-motion-managed {
-  perspective: 1400px;
-  transform-style: preserve-3d;
-  overflow: hidden;
-}
-
-.section.section-motion-managed .stage-item,
-.section.section-motion-managed .stage-subitem,
-.section.section-motion-managed .stage-fade {
-  transition: none;
-}
-
-.section.section-motion-managed .section-heading,
-.section.section-motion-managed .about-visual,
-.section.section-motion-managed .story-copy,
-.section.section-motion-managed .ask-panel,
-.section.section-motion-managed .universe-stage,
-.section.section-motion-managed .skills-column,
-.section.section-motion-managed .project-list,
-.section.section-motion-managed .project-detail,
-.section.section-motion-managed .contact-display {
+.page-content.is-slide-motion > .hero,
+.page-content.is-slide-motion > .section {
+  min-height: calc(100svh - 116px);
   transform-style: preserve-3d;
   backface-visibility: hidden;
-}
-
-.section.section-motion-managed .about-visual,
-.section.section-motion-managed .universe-stage,
-.section.section-motion-managed .project-detail {
   will-change: transform, opacity, filter;
 }
 
-.section.is-motion-active {
+.page-content.is-slide-motion > .section-slide-panel {
+  scroll-margin-top: 116px;
+}
+
+.page-content.is-slide-motion > .section-slide-panel.is-slide-active {
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow:
     var(--shadow),
     0 0 0 1px var(--active-glow-soft),
     0 24px 80px rgba(0, 0, 0, 0.18);
+}
+
+.page-content.is-slide-motion [data-reveal] .stage-item,
+.page-content.is-slide-motion [data-reveal] .stage-subitem,
+.page-content.is-slide-motion [data-reveal] .stage-fade {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0) scale(1);
+  transition: none;
+}
+
+.section-slide-aura {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 18% 12%, var(--active-glow), transparent 32%),
+    linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.06) 38%, transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .section-kicker,
@@ -1329,25 +1306,6 @@ html[lang="zh-CN"] .section-title {
   max-width: 760px;
   font-size: clamp(1.95rem, 4vw, 3.2rem);
   line-height: 1.06;
-}
-
-.split-reveal-ready .section-title,
-.split-reveal-ready .section-copy {
-  visibility: visible;
-}
-
-.split-reveal-word,
-.split-reveal-char {
-  display: inline-block;
-}
-
-.split-reveal-char,
-.split-reveal-line {
-  will-change: transform, opacity, filter;
-}
-
-.split-reveal-line {
-  display: block;
 }
 
 .identity-shell {
@@ -3310,6 +3268,12 @@ html[lang="zh-CN"] .contact-display p {
 .admin-remove {
   justify-self: start;
   color: #ffb2b2;
+}
+
+.admin-spaced-action {
+  display: flex;
+  width: fit-content;
+  margin-top: 14px;
 }
 
 .admin-check {

@@ -67,7 +67,7 @@ const removeCard = (index) => {
             <textarea v-model="item.text" class="admin-textarea" rows="4"></textarea>
           </label>
 
-          <button type="button" class="admin-remove" @click="removeCard(index)">删除卡片</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeCard(index)">删除卡片</button>
         </article>
       </div>
     </div>

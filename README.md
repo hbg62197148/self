@@ -1,18 +1,18 @@
 # Personal Issue
 
-一个基于 `Vue 3 + Vite + Express + GSAP + Three.js` 搭建的个人主页与轻量内容管理项目。
+一个基于 `Vue 3 + Vite + Express + SQLite + GSAP + Three.js` 的个人主页与轻量后台内容管理项目。
 
-它不只是静态展示页：前台展示个人介绍、身份拆解、技能、项目和联系方式；后台可以编辑并发布内容，前台通过接口读取最新 JSON 数据，不需要每次改代码后重新打包。
+项目分为前台展示和后台编辑两部分：前台通过接口读取已发布内容，后台登录后维护草稿、发布版本和账号密码。内容不再依赖重新打包，也不再以单个 JSON 文件作为主要运行数据源。
 
 ## 项目概览
 
-当前项目主要由三部分组成：
-
 - 前台个人主页：`/`
 - 后台内容管理页：`/admin`
-- Express 内容服务与接口：`server/index.js`
+- Express 接口服务：`server/index.js`
+- 运行时数据库：`server/data/app.sqlite`
+- 默认内容模板：`src/data/profile.js`
 
-前端源码位于 `src/`，运行时内容数据位于 `server/data/profile.json`。
+`server/data/profile.json` 是旧版本遗留数据文件，当前服务代码不再主要读取它。现在真正使用的是 SQLite。
 
 ## 技术栈
 
@@ -21,7 +21,7 @@
 - `Vue 3`
 - `Vue Router`
 - `Vite`
-- `GSAP`
+- `GSAP / ScrollTrigger`
 - `Three.js`
 - 原生 `CSS`
 - `@fontsource/bebas-neue`
@@ -30,191 +30,190 @@
 后端：
 
 - `Express`
-- 本地 JSON 文件持久化
+- `better-sqlite3`
+- `bcryptjs`
+- `dotenv`
 - Cookie 会话登录
 
 ## 当前功能
 
 ### 前台展示
 
-前台页面由这些区块组成：
+前台由 6 个主要区块组成：
 
-- `Hero`：首页标题、CTA、Three.js 粒子信号核心和个人信息卡片
-- `Identity`：字母拆解与中文释义悬停反馈
-- `About`：个人介绍、问答切换、互动信号探针扫描
-- `Skills`：Three.js 技能宇宙、技能节点联动、核心块和技能卡片
-- `Projects`：项目 tab、详情抽屉切换和信号卡
-- `Contact`：联系方式展示、复制/发送保护
-- 顶部导航支持中文 / 英文切换，默认展示中文版本
+- `Hero`：首页标题、CTA、Three.js 信号核心和个人信息卡片
+- `Identity`：身份字母拆解、中文释义和交互反馈
+- `About`：个人介绍、问答切换和 Profile Map 视觉层
+- `Skills`：Three.js 技能宇宙、技能节点联动和技能卡片
+- `Projects`：项目列表、详情面板和移动端抽屉详情
+- `Contact`：联系方式展示、复制/跳转和验证码保护
 
-对应目录：
+相关目录：
 
 - [src/components/sections](./src/components/sections)
+- [src/views/ProfilePage.vue](./src/views/ProfilePage.vue)
 
 ### 中英文切换
 
-前台展示层内置了中文和英文两套文案。默认语言为中文，顶部导航右侧的 `EN` / `中文` 按钮可以即时切换版本，选择会写入 `localStorage`，刷新后保持上一次语言。
-
-为了不增加后台内容管理的复杂度，中英文切换目前放在前台展示层处理：后台仍维护单份 `server/data/profile.json`，前台通过本地化映射生成当前语言的展示内容。
+前台支持中文 / 英文切换。后台仍维护一份基础内容，前台通过本地化映射生成当前语言的展示文案。
 
 相关文件：
 
 - [src/composables/useLocale.js](./src/composables/useLocale.js)
 - [src/i18n/profileLocale.js](./src/i18n/profileLocale.js)
-- [src/views/ProfilePage.vue](./src/views/ProfilePage.vue)
 - [src/components/layout/SiteHeader.vue](./src/components/layout/SiteHeader.vue)
 
 ### 后台内容管理
 
 后台支持编辑：
 
-- Hero 首页内容
-- Identity 身份拆解
-- About 介绍内容
-- Skills 技能内容
-- Projects 项目内容
-- Questions 问答内容
-- Contact 联系方式
+- 首页资料
+- 身份拆解
+- 个人介绍
+- 问答内容
+- 技能内容
+- 项目内容
+- 联系方式
 
-对应文件：
+后台现在区分“保存草稿”和“发布内容”：
 
-- [src/views/AdminPage.vue](./src/views/AdminPage.vue)
-- [src/components/admin](./src/components/admin)
-- [src/utils/profileValidation.js](./src/utils/profileValidation.js)
-
-### 登录与表单校验
-
-后台页面有登录保护和基础表单校验。未登录时不能进入后台编辑页，也不能发布内容。
-
-默认演示账号：
-
-- 账号：`hbg62197148`
-- 密码：`62197148ax.`
-
-账号密码目前写在：
-
-- [server/services/adminAuth.js](./server/services/adminAuth.js)
-
-如果后续部署到公网，建议把账号密码改成环境变量或数据库配置。
-
-### 联系方式保护
-
-前台默认不会直接暴露完整邮箱或微信。用户点击复制或发送时，会先弹出验证码窗口。
-
-流程：
-
-1. 前台展示脱敏后的联系方式。
-2. 用户点击 `copy` 或 `send`。
-3. 调用 `POST /api/contact/challenge` 创建验证码。
-4. 用户输入正确答案后调用 `POST /api/contact/access`。
-5. 验证通过后才返回真实联系方式并执行复制或跳转。
+- 保存草稿：写入 `draft` 版本，前台不会更新
+- 发布内容：写入 `published` 版本，前台读取最新发布版
+- 历史版本：后台会读取最近的版本列表
 
 相关文件：
 
-- [src/components/sections/ContactSection.vue](./src/components/sections/ContactSection.vue)
-- [src/components/contact/ContactCaptchaDialog.vue](./src/components/contact/ContactCaptchaDialog.vue)
-- [src/components/contact/ContactGuardMascot.vue](./src/components/contact/ContactGuardMascot.vue)
+- [src/views/AdminPage.vue](./src/views/AdminPage.vue)
+- [src/components/admin](./src/components/admin)
+- [src/services/profileApi.js](./src/services/profileApi.js)
+- [src/utils/profileValidation.js](./src/utils/profileValidation.js)
+- [server/services/profileStore.js](./server/services/profileStore.js)
+
+### 登录与账号安全
+
+后台登录使用 SQLite + bcrypt hash：
+
+- 首次启动时从 `.env` 读取 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD`
+- 初始化后写入 `admin_users.password_hash`
+- 后续登录校验数据库中的 hash
+- 后台提供“账号安全”面板，可以修改登录密码
+- 修改密码成功后会清空当前用户 session，需要重新登录
+
+`.env` 示例：
+
+```env
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=change-me-please
+PORT=3001
+```
+
+注意：`.env` 只用于首次初始化管理员账号。数据库已经存在管理员后，直接改 `.env` 不会自动修改登录密码。忘记密码时，应通过本地数据库重置或专门的本地重置脚本处理，不建议在公开登录页放“忘记密码”入口。
+
+相关文件：
+
+- [server/services/adminAuth.js](./server/services/adminAuth.js)
+- [src/services/adminAuthApi.js](./src/services/adminAuthApi.js)
+- [src/components/admin/AdminLoginForm.vue](./src/components/admin/AdminLoginForm.vue)
+- [src/components/admin/AdminPasswordEditor.vue](./src/components/admin/AdminPasswordEditor.vue)
+
+### 联系方式保护
+
+前台不会直接暴露完整的受保护联系方式。
+
+流程：
+
+1. `GET /api/profile` 返回已发布内容，并对受保护联系方式脱敏。
+2. 用户点击复制或发送。
+3. 前台调用 `POST /api/contact/challenge` 创建验证码。
+4. 用户提交答案到 `POST /api/contact/access`。
+5. 验证通过后服务端返回真实联系方式，前台再复制或跳转。
+
+相关文件：
+
 - [src/composables/useProtectedContactAction.js](./src/composables/useProtectedContactAction.js)
+- [src/components/contact/ContactCaptchaDialog.vue](./src/components/contact/ContactCaptchaDialog.vue)
 - [server/services/contactProtection.js](./server/services/contactProtection.js)
 - [server/services/publicProfile.js](./server/services/publicProfile.js)
 
-### GSAP 动效
+### 动效系统
 
-项目目前接入了较多 GSAP 动效：
+项目保留了较丰富的动效，但目前主线更清晰：
 
-- Hero 标题逐字入场
-- Hero 漂浮球随机缓慢移动、碰撞反弹和鼠标视差
-- CTA 按钮磁吸和光斑跟随
-- 左下角悬浮球可切换完整动效 / 弱化动效，并支持拖拽吸边
-- Identity 字母翻面、行级视差和聚焦降亮
-- About 信号探针点击后向下发出扫描光束
-- Skills 技能节点联动和连线反馈
-- Projects 详情抽屉切换、项目预览层飞入、信号卡延迟亮起
-- 章节滚动时的扫描光和分层入场
-- 顶部导航 active 指示器滑动
-- 右下角章节指示器翻入和光晕反馈
-- 前台主要卡片 hover 光斑、轻微磁吸和 3D 倾斜
-- 联系验证码弹窗小人物状态反馈
+- 首页模块切换以 `ScrollTrigger` 面板切换为主
+- 桌面端滚动到模块底部时，当前模块 pin 住并缩放淡出
+- 内容高于视口的模块会先做内部假滚动，再切换到下一模块
+- 移动端和 `Lite` 模式会降级为更自然的滚动体验
+- Hero 首屏、CTA、Identity、Projects、Skills 等内部交互动画继续保留
 
-主要逻辑集中在：
+主要文件：
 
+- [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js)
 - [src/composables/useHeroMotion.js](./src/composables/useHeroMotion.js)
-- [src/composables/useMotionPreference.js](./src/composables/useMotionPreference.js)
 - [src/composables/useIdentityMotion.js](./src/composables/useIdentityMotion.js)
 - [src/composables/useProjectPanelMotion.js](./src/composables/useProjectPanelMotion.js)
-- [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js)
 - [src/composables/useSurfaceMotion.js](./src/composables/useSurfaceMotion.js)
-- [src/composables/useSkillUniverse.js](./src/composables/useSkillUniverse.js)
+- [src/composables/useMotionPreference.js](./src/composables/useMotionPreference.js)
 
-### Three.js 视觉增强
+左下角动效开关可在完整动效和 `Lite` 模式之间切换，偏好会写入 `localStorage`。
 
-项目在前台重点视觉区接入了轻量 Three.js 视觉层，用来强化个人信号系统的空间感。
+### Three.js 视觉层
 
-- Three.js 通过动态 `import("three")` 加载，不进入首屏主包
-- Hero 右侧头像卡片使用粒子环绕核心，替代原来的 CSS 渐变圆球
-- Skills 区块使用 3D 星图承载技能宇宙节点、连线和粒子流
-- 3D 场景只作为视觉层，原有 DOM 内容仍负责文本、按钮、hover、focus、click 和可访问交互
-- Skills hover 或点击技能节点时，3D 星图会同步高亮对应节点、连线和粒子流
-- WebGL 不可用时保留原 SVG 连线作为 fallback
-- `Lite` 模式下会降低 3D 层透明度并停止持续动画，保留静态视觉反馈
+Three.js 用在前台重点视觉区：
+
+- Hero 的信号核心
+- Skills 的技能宇宙
+- About 的 Profile Map
 
 相关文件：
 
 - [src/components/visuals/HeroSignalCoreScene.vue](./src/components/visuals/HeroSignalCoreScene.vue)
 - [src/components/visuals/SkillUniverseScene.vue](./src/components/visuals/SkillUniverseScene.vue)
-- [src/components/sections/HeroSection.vue](./src/components/sections/HeroSection.vue)
-- [src/components/sections/SkillsSection.vue](./src/components/sections/SkillsSection.vue)
-- [src/composables/useSkillUniverse.js](./src/composables/useSkillUniverse.js)
+- [src/components/visuals/ProfileMapScene.vue](./src/components/visuals/ProfileMapScene.vue)
 
-## 性能建议
+## 数据存储
 
-当前动效偏丰富，如果电脑打开页面出现卡顿，可以优先关闭较重的全局动效。
+当前运行数据存放在 SQLite：
 
-最直接的做法是在 [src/views/ProfilePage.vue](./src/views/ProfilePage.vue) 中暂时注释：
-
-```js
-// useSurfaceMotion();
+```text
+server/data/app.sqlite
+server/data/app.sqlite-wal
+server/data/app.sqlite-shm
 ```
 
-如果还想继续降负载，可以再考虑：
+主要表：
 
-- 保持 [src/composables/usePointerGlow.js](./src/composables/usePointerGlow.js) 不启用，避免低存在感但持续运行的指针光效
-- 简化 [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js) 的滚动动画
-- 关闭或降级 [src/components/visuals/HeroSignalCoreScene.vue](./src/components/visuals/HeroSignalCoreScene.vue) 的 Hero 粒子核心
-- 关闭或降级 [src/components/visuals/SkillUniverseScene.vue](./src/components/visuals/SkillUniverseScene.vue) 的 Three.js 星图
-- 减少大面积 `filter: blur()`、`box-shadow`、`backdrop-filter`
-- 对低性能设备自动关闭部分动效
+- `admin_users`：后台账号和 `password_hash`
+- `profile_versions`：内容版本，`status` 为 `draft` 或 `published`
 
-目前项目已经内置动效模式开关：
+不要直接删除这些 SQLite 文件，否则会丢失后台账号、草稿、发布内容和历史版本。
 
-- 点击左下角悬浮球可在 `FX` 和 `Lite` 之间切换
-- `Lite` 模式会弱化部分全局动效，并让 Three.js 视觉层停止持续动画，降低页面负载
-- 悬浮球支持拖拽，松手后会自动吸附到屏幕左右边缘
+`server/data/profile.json` 是旧版本 JSON 数据，当前代码不再主要使用。需要保留历史参考时可以改名为 `profile.legacy.json`。
 
 ## 数据流
 
-项目的核心数据流如下：
-
-1. 后台 `/admin` 编辑内容。
-2. 前台调用 `PUT /api/profile` 发布。
-3. 服务端写入 [server/data/profile.json](./server/data/profile.json)。
-4. 前台通过 `GET /api/profile` 获取最新内容。
-5. `useProfileContent` 会定时轮询刷新，前台不需要重新打包。
-
-未登录访问 `GET /api/profile` 时，服务端会返回脱敏后的公共数据；后台登录后会返回完整数据。
+1. 后台 `/admin` 登录。
+2. 后台读取 `GET /api/admin/profile/draft`。
+3. 点击“保存草稿”调用 `PUT /api/admin/profile/draft`，前台不更新。
+4. 点击“发布内容”调用 `POST /api/admin/profile/publish`。
+5. 前台通过 `GET /api/profile` 读取最新已发布版本。
+6. `useProfileContent` 会定时轮询，发布后前台可自动刷新。
 
 ## 接口说明
 
-后台登录：
+后台账号：
 
-- `POST /api/admin/login`：后台登录
-- `GET /api/admin/session`：获取当前登录状态
-- `POST /api/admin/logout`：退出后台登录
+- `POST /api/admin/login`：登录
+- `GET /api/admin/session`：读取当前登录状态
+- `POST /api/admin/logout`：退出登录
+- `POST /api/admin/change-password`：修改后台密码，需要登录
 
 内容管理：
 
-- `GET /api/profile`：获取前台内容
-- `PUT /api/profile`：发布后台编辑内容，需要登录
+- `GET /api/profile`：读取前台公开内容，只返回已发布版本
+- `GET /api/admin/profile/draft`：读取后台草稿，需要登录
+- `PUT /api/admin/profile/draft`：保存草稿，需要登录
+- `POST /api/admin/profile/publish`：发布内容，需要登录
+- `GET /api/admin/profile/versions`：读取历史版本列表，需要登录
 
 联系方式保护：
 
@@ -234,6 +233,14 @@
 npm install
 ```
 
+创建 `.env`：
+
+```env
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=change-me-please
+PORT=3001
+```
+
 启动开发环境：
 
 ```bash
@@ -251,9 +258,9 @@ npm run dev
 http://127.0.0.1:5173/admin
 ```
 
-## 手机访问本地页面
+不要直接打开 `dist/index.html` 文件访问后台，否则接口、路由和 Cookie 行为都可能不正常。
 
-如果想在手机上预览，需要让 Vite 监听局域网地址。
+## 手机访问本地页面
 
 一个终端启动后端：
 
@@ -261,31 +268,19 @@ http://127.0.0.1:5173/admin
 npm run dev:server
 ```
 
-另一个终端启动前端：
+另一个终端启动前端并监听局域网：
 
 ```bash
 npm run dev:client -- --host 0.0.0.0
 ```
 
-然后在电脑上运行：
-
-```bash
-ipconfig
-```
-
-找到当前 Wi-Fi 的 `IPv4 地址`，手机和电脑连接同一个 Wi-Fi 后，在手机浏览器访问：
+然后用 `ipconfig` 找到电脑的 IPv4 地址，手机和电脑连接同一个 Wi-Fi 后访问：
 
 ```text
 http://你的电脑IPv4地址:5173
 ```
 
-例如：
-
-```text
-http://192.168.1.23:5173
-```
-
-## 构建与预览
+## 构建与生产运行
 
 构建前端：
 
@@ -293,58 +288,63 @@ http://192.168.1.23:5173
 npm run build
 ```
 
-预览构建结果：
+预览前端构建结果：
 
 ```bash
 npm run preview
 ```
 
-启动生产服务：
+启动 Express 生产服务：
 
 ```bash
 npm run start
 ```
 
-如果本地存在 `dist/`，Express 会同时托管前端静态页面和接口。
+如果存在 `dist/`，Express 会同时托管前端静态页面和 `/api` 接口。
 
 ## 路由
 
-前端路由位于：
-
-- [src/router/index.js](./src/router/index.js)
-
-当前路由：
+前端路由：
 
 - `/`：前台个人主页
 - `/admin`：后台内容管理页
+
+配置文件：
+
+- [src/router/index.js](./src/router/index.js)
 
 ## 目录结构
 
 ```text
 .
-├── public/                     # 公共静态资源
-├── server/                     # Express 内容服务
+├── public/                      # 公共静态资源
+├── server/                      # Express 服务
 │   ├── data/
-│   │   └── profile.json        # 运行时内容数据
+│   │   ├── app.sqlite           # SQLite 主数据库
+│   │   ├── app.sqlite-wal       # SQLite WAL 文件
+│   │   ├── app.sqlite-shm       # SQLite 共享内存文件
+│   │   └── profile.json         # 旧版本遗留 JSON 数据
 │   ├── services/
-│   │   ├── adminAuth.js        # 后台登录和会话
+│   │   ├── adminAuth.js         # 后台登录、会话、修改密码
 │   │   ├── contactProtection.js # 联系方式验证码保护
-│   │   ├── profileStore.js     # 内容读写
-│   │   └── publicProfile.js    # 公共 profile 脱敏
-│   └── index.js                # 服务入口
+│   │   ├── profileStore.js      # SQLite 内容版本读写
+│   │   └── publicProfile.js     # 前台公开数据脱敏
+│   ├── db.js                    # SQLite 初始化
+│   └── index.js                 # 服务入口
 ├── src/
 │   ├── components/
-│   │   ├── admin/              # 后台编辑组件
-│   │   ├── contact/            # 联系验证码弹窗与小人物
-│   │   ├── layout/             # 页头、页脚、加载层与全局控件
-│   │   ├── sections/           # 前台主要区块组件
-│   │   └── visuals/            # Three.js 等视觉增强组件
-│   ├── composables/            # 页面逻辑与动效逻辑
-│   ├── data/                   # 默认内容模板
-│   ├── router/                 # 前端路由
-│   ├── services/               # 前端 API 请求封装
-│   ├── utils/                  # 校验与工具函数
-│   ├── views/                  # 页面级视图
+│   │   ├── admin/               # 后台编辑组件
+│   │   ├── contact/             # 联系验证码弹窗
+│   │   ├── layout/              # 页头、页脚、加载层、动效开关
+│   │   ├── sections/            # 前台主要区块
+│   │   └── visuals/             # Three.js 视觉层
+│   ├── composables/             # 页面逻辑、数据和动效逻辑
+│   ├── data/                    # 默认内容模板
+│   ├── i18n/                    # 前台语言映射
+│   ├── router/                  # 前端路由
+│   ├── services/                # 前端 API 封装
+│   ├── utils/                   # 内容校验
+│   ├── views/                   # 页面级视图
 │   ├── App.vue
 │   ├── fonts.css
 │   ├── main.js
@@ -355,62 +355,42 @@ npm run start
 └── README.md
 ```
 
-## 组件化说明
+## 关键文件
 
-页面层：
+前台页面：
 
 - [src/views/ProfilePage.vue](./src/views/ProfilePage.vue)
+- [src/components/sections](./src/components/sections)
+
+后台页面：
+
 - [src/views/AdminPage.vue](./src/views/AdminPage.vue)
+- [src/components/admin](./src/components/admin)
 
-前台区块：
+API 封装：
 
-- [src/components/sections/HeroSection.vue](./src/components/sections/HeroSection.vue)
-- [src/components/sections/IdentitySection.vue](./src/components/sections/IdentitySection.vue)
-- [src/components/sections/AboutSection.vue](./src/components/sections/AboutSection.vue)
-- [src/components/sections/SkillsSection.vue](./src/components/sections/SkillsSection.vue)
-- [src/components/sections/ProjectsSection.vue](./src/components/sections/ProjectsSection.vue)
-- [src/components/sections/ContactSection.vue](./src/components/sections/ContactSection.vue)
+- [src/services/profileApi.js](./src/services/profileApi.js)
+- [src/services/adminAuthApi.js](./src/services/adminAuthApi.js)
+- [src/services/contactAccessApi.js](./src/services/contactAccessApi.js)
 
-视觉增强：
+后端服务：
 
-- [src/components/visuals/HeroSignalCoreScene.vue](./src/components/visuals/HeroSignalCoreScene.vue)
-- [src/components/visuals/SkillUniverseScene.vue](./src/components/visuals/SkillUniverseScene.vue)
-
-后台编辑：
-
-- [src/components/admin/AdminHeroEditor.vue](./src/components/admin/AdminHeroEditor.vue)
-- [src/components/admin/AdminIdentityEditor.vue](./src/components/admin/AdminIdentityEditor.vue)
-- [src/components/admin/AdminAboutEditor.vue](./src/components/admin/AdminAboutEditor.vue)
-- [src/components/admin/AdminSkillsEditor.vue](./src/components/admin/AdminSkillsEditor.vue)
-- [src/components/admin/AdminProjectsEditor.vue](./src/components/admin/AdminProjectsEditor.vue)
-- [src/components/admin/AdminQuestionsEditor.vue](./src/components/admin/AdminQuestionsEditor.vue)
-- [src/components/admin/AdminContactEditor.vue](./src/components/admin/AdminContactEditor.vue)
-- [src/components/admin/AdminValidationSummary.vue](./src/components/admin/AdminValidationSummary.vue)
-- [src/components/admin/AdminLoginForm.vue](./src/components/admin/AdminLoginForm.vue)
-
-逻辑层：
-
-- [src/composables/useProfileContent.js](./src/composables/useProfileContent.js)
-- [src/composables/useProtectedContactAction.js](./src/composables/useProtectedContactAction.js)
-- [src/composables/useMotionPreference.js](./src/composables/useMotionPreference.js)
-- [src/composables/useHeroMotion.js](./src/composables/useHeroMotion.js)
-- [src/composables/useIdentityMotion.js](./src/composables/useIdentityMotion.js)
-- [src/composables/useProjectPanelMotion.js](./src/composables/useProjectPanelMotion.js)
-- [src/composables/useSectionTransitionMotion.js](./src/composables/useSectionTransitionMotion.js)
-- [src/composables/useSurfaceMotion.js](./src/composables/useSurfaceMotion.js)
-- [src/composables/useSkillUniverse.js](./src/composables/useSkillUniverse.js)
+- [server/index.js](./server/index.js)
+- [server/db.js](./server/db.js)
+- [server/services/adminAuth.js](./server/services/adminAuth.js)
+- [server/services/profileStore.js](./server/services/profileStore.js)
+- [server/services/publicProfile.js](./server/services/publicProfile.js)
 
 ## 可继续优化
 
-- 将后台账号密码改为环境变量
+- 增加本地管理员密码重置脚本
 - 增加登录失败限频
 - 增加联系接口限频
 - 增加图片上传能力
-- 增加内容版本记录和回滚
-- 增加项目详情页
-- 建立统一动效开关配置
-- 对低性能设备自动降级动画
+- 增加历史版本查看详情和回滚
+- 增加项目详情页或文章模块
+- 对低性能设备进一步自动降级动画
 
 ## License
 
-仓库中已经包含许可文件；如果后续公开发布，建议再确认许可证内容是否符合你的使用场景。
+如果后续公开发布，建议补充或确认许可证内容是否符合你的使用场景。

@@ -78,7 +78,7 @@ const removeContactItem = (index) => {
               <span>改为复制按钮</span>
             </label>
           </div>
-          <button type="button" class="admin-remove" @click="removeContactItem(index)">删除联系卡片</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeContactItem(index)">删除联系卡片</button>
         </article>
       </div>
     </div>

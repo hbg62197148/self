@@ -1,12 +1,33 @@
+import bcrypt from "bcryptjs";
 import { randomUUID } from "node:crypto";
+import { db } from "../db.js";
 
-const ADMIN_USERNAME = "hbg62197148";
-const ADMIN_PASSWORD = "62197148ax.";
 const SESSION_COOKIE = "personal_issue_admin";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
 const sessions = new Map();
 
-// 用最小代价解析 Cookie，给后台登录态做会话识别。
+function now() {
+  return new Date().toISOString();
+}
+
+export function ensureDefaultAdmin() {
+  const exists = db.prepare("SELECT id FROM admin_users LIMIT 1").get();
+
+  if (exists) return;
+
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!username || !password) {
+    throw new Error("请在 .env 中配置 ADMIN_USERNAME 和 ADMIN_PASSWORD");
+  }
+
+  db.prepare(`
+    INSERT INTO admin_users (username, password_hash, created_at)
+    VALUES (?, ?, ?)
+  `).run(username, bcrypt.hashSync(password, 12), now());
+}
+
 function parseCookies(cookieHeader = "") {
   return cookieHeader
     .split(";")
@@ -14,41 +35,60 @@ function parseCookies(cookieHeader = "") {
     .filter(Boolean)
     .reduce((cookies, item) => {
       const [name, ...rest] = item.split("=");
-
       cookies[name] = decodeURIComponent(rest.join("="));
       return cookies;
     }, {});
 }
 
 function cleanupExpiredSessions() {
-  const now = Date.now();
+  const current = Date.now();
 
-  Array.from(sessions.entries()).forEach(([token, session]) => {
-    if (session.expiresAt <= now) {
+  for (const [token, session] of sessions.entries()) {
+    if (session.expiresAt <= current) {
       sessions.delete(token);
     }
-  });
+  }
 }
 
 function buildCookie(token, maxAgeSeconds) {
   return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}`;
 }
 
-// 只有账号密码完全匹配时，才会创建后台会话。
 export function loginAdmin(username, password) {
-  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+  const user = db.prepare("SELECT * FROM admin_users WHERE username = ?").get(username);
+
+  if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return null;
   }
 
   cleanupExpiredSessions();
 
   const token = randomUUID();
+
   sessions.set(token, {
-    username: ADMIN_USERNAME,
+    username: user.username,
     expiresAt: Date.now() + SESSION_MAX_AGE_SECONDS * 1000
   });
 
   return token;
+}
+
+export function changeAdminPassword(username, currentPassword, nextPassword) {
+  const user = db.prepare("SELECT * FROM admin_users WHERE username = ?").get(username);
+
+  if (!user || !bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return false;
+  }
+
+  db.prepare("UPDATE admin_users SET password_hash = ? WHERE id = ?").run(bcrypt.hashSync(nextPassword, 12), user.id);
+
+  for (const [token, session] of sessions.entries()) {
+    if (session.username === username) {
+      sessions.delete(token);
+    }
+  }
+
+  return true;
 }
 
 export function getAdminSession(request) {
@@ -57,15 +97,11 @@ export function getAdminSession(request) {
   const cookies = parseCookies(request.headers.cookie ?? "");
   const token = cookies[SESSION_COOKIE];
 
-  if (!token) {
-    return null;
-  }
+  if (!token) return null;
 
   const session = sessions.get(token);
 
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
   return {
     token,

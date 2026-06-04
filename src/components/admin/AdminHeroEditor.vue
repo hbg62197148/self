@@ -126,7 +126,7 @@ const removeTag = (index) => {
               <input v-model="item.value" class="admin-input" type="text">
             </label>
           </div>
-          <button type="button" class="admin-remove" @click="removeStat(index)">删除统计</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeStat(index)">删除统计</button>
         </article>
       </div>
     </div>

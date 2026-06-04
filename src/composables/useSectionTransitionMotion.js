@@ -2,351 +2,219 @@ import { nextTick, onBeforeUnmount, onMounted, watch } from "vue";
 import { gsap, ScrollTrigger } from "../lib/gsap";
 import { useMotionPreference } from "./useMotionPreference";
 
-const SECTION_GROUPS = [
-  {
-    id: "identity",
-    groups: [
-      { selector: ".section-heading", from: { x: -30, y: 28 }, duration: 0.72, at: 0.12 },
-      { selector: ".name-ghost", from: { x: 0, y: 52, scale: 0.94, rotateX: 9, z: -70 }, duration: 0.86, at: 0.18 },
-      { selector: ".name-row", all: true, from: { x: 38, y: 34, rotateX: 7 }, duration: 0.76, stagger: 0.055, at: 0.34 }
-    ]
-  },
-  {
-    id: "about",
-    drift: {
-      focus: ".about-visual",
-      support: ".story-copy, .ask-panel"
-    },
-    groups: [
-      { selector: ".about-visual", from: { x: 0, y: 58, scale: 0.94, rotateX: 10, rotateY: -5, z: -100 }, duration: 0.94, at: 0.1 },
-      { selector: ".section-heading", from: { x: -28, y: 30, scale: 0.99 }, duration: 0.7, at: 0.26 },
-      { selector: ".story-copy .stage-item", all: true, from: { x: 0, y: 28, scale: 0.988 }, duration: 0.58, stagger: 0.055, at: 0.42 },
-      { selector: ".ask-panel", from: { x: 20, y: 44, scale: 0.97, rotateX: 7, rotateY: 3, z: -54 }, duration: 0.82, at: 0.54 }
-    ]
-  },
-  {
-    id: "skills",
-    drift: {
-      focus: ".universe-stage",
-      support: ".skills-column"
-    },
-    groups: [
-      { selector: ".universe-stage", from: { x: -24, y: 56, scale: 0.935, rotateX: 10, rotateY: 6, z: -116 }, duration: 0.94, at: 0.1 },
-      { selector: ".section-heading", from: { x: -28, y: 30, scale: 0.99 }, duration: 0.7, at: 0.28 },
-      { selector: ".skill-evidence-card", from: { x: 24, y: 32, scale: 0.975, rotateX: 6, rotateY: -3, z: -46 }, duration: 0.72, at: 0.44 },
-      {
-        selector: ".skills-column .skill-card",
-        all: true,
-        from: { x: 28, y: 34, scale: 0.985, rotateX: 7 },
-        duration: 0.72,
-        stagger: 0.075,
-        at: 0.56
-      }
-    ]
-  },
-  {
-    id: "projects",
-    drift: {
-      focus: ".project-detail, .project-accordion-detail",
-      support: ".project-list"
-    },
-    groups: [
-      { selector: ".project-detail", from: { x: 26, y: 58, scale: 0.94, rotateX: 9, rotateY: -6, z: -112 }, duration: 0.94, at: 0.1 },
-      { selector: ".section-heading", from: { x: -28, y: 30, scale: 0.99 }, duration: 0.7, at: 0.26 },
-      { selector: ".project-list .project-tab", all: true, from: { x: -30, y: 28, scale: 0.982, rotateX: 6, rotateY: 4 }, duration: 0.66, stagger: 0.055, at: 0.42 }
-    ]
-  },
-  {
-    id: "contact",
-    groups: [
-      { selector: ".section-heading", from: { x: -30, y: 28 }, duration: 0.72, at: 0.12 },
-      { selector: ".contact-display", from: { x: -36, y: 36, rotateX: 7 }, duration: 0.82, at: 0.24 },
-      {
-        selector: ".contact-card",
-        all: true,
-        from: { x: 30, y: 34, rotateX: 7 },
-        duration: 0.72,
-        stagger: 0.08,
-        at: 0.36
-      }
-    ]
+const PANEL_SELECTOR = ".page-content > .hero, .page-content > .section";
+const ENABLE_QUERY = "(min-width: 861px) and (min-height: 620px)";
+
+const canUseWindow = () => typeof window !== "undefined" && typeof document !== "undefined";
+
+const waitForFonts = async () => {
+  try {
+    await document.fonts?.ready;
+  } catch {
+    // Font loading is only used to improve height measurement accuracy.
   }
-];
-
-const toArray = (value) => (Array.isArray(value) ? value : [value]);
-
-const collectSelectorTargets = (root, selector) => {
-  if (!selector) {
-    return [];
-  }
-
-  return [...root.querySelectorAll(selector)];
 };
 
-const createFromState = (group) => ({
-  autoAlpha: 0,
-  x: group.from.x ?? 0,
-  y: group.from.y ?? 0,
-  z: group.from.z ?? -32,
-  scale: group.from.scale ?? 0.982,
-  rotateX: group.from.rotateX ?? 5,
-  rotateY: group.from.rotateY ?? 0,
-  filter: "blur(16px)",
-  transformPerspective: 1400,
-  transformOrigin: group.transformOrigin ?? "center top"
-});
-
-const createToState = (group) => ({
-  autoAlpha: 1,
-  x: 0,
-  y: 0,
-  z: 0,
-  scale: 1,
-  rotateX: 0,
-  rotateY: 0,
-  filter: "blur(0px)",
-  duration: group.duration,
-  stagger: group.stagger ?? 0
-});
+const getPanelContentTargets = (panel) =>
+  [...panel.children].filter((child) => !child.matches(".section-slide-aura"));
 
 export function useSectionTransitionMotion() {
   const { isMotionLite } = useMotionPreference();
 
   let context = null;
   let createFrameId = 0;
+  let resizeObserver = null;
+  let mediaQuery = null;
   let stopMotionWatch = null;
-  const cleanupChrome = [];
+  let removeMediaListener = null;
+  let refreshToken = 0;
 
-  const cleanupSectionMotion = () => {
+  const cleanup = () => {
+    refreshToken += 1;
+
     if (createFrameId) {
       window.cancelAnimationFrame(createFrameId);
       createFrameId = 0;
     }
 
+    resizeObserver?.disconnect();
+    resizeObserver = null;
     context?.revert();
     context = null;
-    cleanupChrome.splice(0).forEach((cleanup) => cleanup());
+
+    document.querySelector(".page-content")?.classList.remove("is-slide-motion");
+    document.querySelectorAll(PANEL_SELECTOR).forEach((panel) => {
+      panel.classList.remove("section-slide-panel", "is-slide-active");
+      panel.style.marginBottom = "";
+    });
+    document.querySelectorAll(".section-slide-aura").forEach((node) => node.remove());
   };
 
-  const ensureSectionChrome = (section) => {
-    let aura = section.querySelector(":scope > .section-motion-aura");
-    let scan = section.querySelector(":scope > .section-motion-scan");
+  const createAura = (panel) => {
+    let aura = panel.querySelector(":scope > .section-slide-aura");
 
     if (!aura) {
       aura = document.createElement("span");
-      aura.className = "section-motion-aura";
+      aura.className = "section-slide-aura";
       aura.setAttribute("aria-hidden", "true");
-      section.prepend(aura);
-      cleanupChrome.push(() => aura.remove());
+      panel.prepend(aura);
     }
 
-    if (!scan) {
-      scan = document.createElement("span");
-      scan.className = "section-motion-scan";
-      scan.setAttribute("aria-hidden", "true");
-      section.prepend(scan);
-      cleanupChrome.push(() => scan.remove());
-    }
-
-    return { aura, scan };
+    return aura;
   };
 
-  const collectGroupTargets = (section, group) => {
-    if (group.all) {
-      return [...section.querySelectorAll(group.selector)];
-    }
+  const measureOverflow = (panel) => {
+    const viewportHeight = window.innerHeight;
+    const contentHeight = panel.scrollHeight;
+    const visibleHeight = panel.clientHeight || viewportHeight;
+    const overflow = Math.max(0, contentHeight - visibleHeight);
+    const ratio = overflow > 0 ? overflow / (overflow + viewportHeight) : 0;
 
-    return toArray(section.querySelector(group.selector)).filter(Boolean);
+    return {
+      overflow,
+      ratio,
+      viewportHeight
+    };
   };
 
-  const createFocusDrift = (section, drift) => {
-    if (!drift) {
+  const createPanelMotion = () => {
+    cleanup();
+
+    const pageContent = document.querySelector(".page-content");
+    const panels = [...document.querySelectorAll(PANEL_SELECTOR)];
+
+    if (!pageContent || panels.length < 2) {
       return;
     }
 
-    const focusTargets = collectSelectorTargets(section, drift.focus);
-    const supportTargets = collectSelectorTargets(section, drift.support);
-
-    if (!focusTargets.length && !supportTargets.length) {
-      return;
-    }
-
-    const timeline = gsap.timeline({
-      defaults: {
-        ease: "none"
-      },
-      scrollTrigger: {
-        trigger: section,
-        start: "top 34%",
-        end: "bottom 28%",
-        scrub: 1.15,
-        invalidateOnRefresh: true
-      }
-    });
-
-    if (focusTargets.length) {
-      timeline.to(
-        focusTargets,
-        {
-          y: -18,
-          z: 28,
-          scale: 1.012,
-          rotateX: -1.2,
-          filter: "blur(0px)",
-          duration: 1
-        },
-        0
-      );
-    }
-
-    if (supportTargets.length) {
-      timeline.to(
-        supportTargets,
-        {
-          y: -8,
-          z: 8,
-          duration: 1
-        },
-        0
-      );
-    }
-  };
-
-  // 完整动效模式下启用滚动时间线；弱动效模式会撤销 ScrollTrigger 和扫描光层。
-  const createSectionTimelines = () => {
-    cleanupSectionMotion();
+    pageContent.classList.add("is-slide-motion");
+    panels.forEach((panel) => panel.classList.add("section-slide-panel"));
 
     context = gsap.context(() => {
-      SECTION_GROUPS.forEach((sectionConfig) => {
-        const section = document.getElementById(sectionConfig.id);
+      panels.slice(0, -1).forEach((panel) => {
+        const contentTargets = getPanelContentTargets(panel);
+        const aura = createAura(panel);
+        const { overflow, ratio, viewportHeight } = measureOverflow(panel);
 
-        if (!section) {
-          return;
+        if (ratio > 0) {
+          panel.style.marginBottom = `${overflow}px`;
         }
 
-        const { aura, scan } = ensureSectionChrome(section);
-        section.classList.add("section-motion-managed");
-        cleanupChrome.push(() => section.classList.remove("section-motion-managed", "is-motion-active"));
-
-        gsap.set(section, {
-          transformPerspective: 1400,
+        gsap.set(panel, {
           transformOrigin: "50% 0%",
-          transformStyle: "preserve-3d"
+          willChange: "transform, opacity, filter"
         });
 
-        gsap.set([aura, scan], {
+        gsap.set(aura, {
           autoAlpha: 0
         });
 
         const timeline = gsap.timeline({
           defaults: {
-            ease: "power3.out"
+            ease: "none",
+            overwrite: "auto"
           },
           scrollTrigger: {
-            trigger: section,
-            start: "top 86%",
-            end: "top 34%",
-            scrub: 0.82,
-            onEnter: () => section.classList.add("is-motion-active"),
-            onEnterBack: () => section.classList.add("is-motion-active"),
-            onLeave: () => section.classList.remove("is-motion-active"),
-            onLeaveBack: () => section.classList.remove("is-motion-active")
+            trigger: panel,
+            start: "bottom bottom",
+            end: () => (ratio > 0 ? `+=${panel.scrollHeight}` : "bottom top"),
+            pin: true,
+            pinSpacing: false,
+            scrub: true,
+            invalidateOnRefresh: true,
+            onEnter: () => panel.classList.add("is-slide-active"),
+            onEnterBack: () => panel.classList.add("is-slide-active"),
+            onLeave: () => panel.classList.remove("is-slide-active"),
+            onLeaveBack: () => panel.classList.remove("is-slide-active")
           }
         });
+
+        if (ratio > 0 && contentTargets.length) {
+          timeline.to(contentTargets, {
+            y: -overflow,
+            duration: ratio / Math.max(1 - ratio, 0.001)
+          });
+        }
 
         timeline
+          .to(aura, {
+            autoAlpha: 1,
+            duration: 0.16
+          }, ratio > 0 ? ">" : 0)
           .fromTo(
-            section,
+            panel,
             {
-              y: 52,
-              scale: 0.986,
-              rotateX: 5,
-              filter: "blur(10px)"
-            },
-            {
-              y: 0,
               scale: 1,
-              rotateX: 0,
-              filter: "blur(0px)",
-              duration: 0.82
-            },
-            0
-          )
-          .fromTo(
-            aura,
-            {
-              autoAlpha: 0,
-              scaleX: 0.42,
-              xPercent: -18
-            },
-            {
               autoAlpha: 1,
-              scaleX: 1,
-              xPercent: 0,
-              duration: 0.68
-            },
-            0.02
-          )
-          .fromTo(
-            scan,
-            {
-              autoAlpha: 0,
-              xPercent: -140
+              filter: "blur(0px)"
             },
             {
-              autoAlpha: 1,
-              xPercent: 120,
-              duration: 0.62,
-              ease: "power2.inOut"
+              scale: 0.86,
+              autoAlpha: 0.54,
+              filter: "blur(1.5px)",
+              duration: 0.84
             },
-            0.08
+            "<"
           )
-          .to(scan, {
+          .to(panel, {
             autoAlpha: 0,
-            duration: 0.18
-          }, 0.56);
-
-        sectionConfig.groups.forEach((group, index) => {
-          const targets = collectGroupTargets(section, group);
-
-          if (!targets.length) {
-            return;
-          }
-
-          timeline.fromTo(
-            targets,
-            createFromState(group),
-            createToState(group),
-            group.at ?? (index === 0 ? 0.12 : "<+=0.08")
-          );
-        });
-
-        createFocusDrift(section, sectionConfig.drift);
+            y: -viewportHeight * 0.08,
+            duration: 0.16
+          });
       });
 
       ScrollTrigger.refresh();
-    });
+    }, pageContent);
+
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(() => ScrollTrigger.refresh());
+      panels.forEach((panel) => resizeObserver.observe(panel));
+    }
   };
 
-  const scheduleSectionTimelines = async () => {
-    if (isMotionLite.value || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const scheduleCreate = async () => {
+    if (!canUseWindow() || isMotionLite.value || !mediaQuery?.matches) {
+      cleanup();
       return;
     }
 
+    const token = refreshToken + 1;
+    refreshToken = token;
+
     await nextTick();
-    createFrameId = window.requestAnimationFrame(createSectionTimelines);
+    await waitForFonts();
+
+    if (token !== refreshToken) {
+      return;
+    }
+
+    createFrameId = window.requestAnimationFrame(() => {
+      createFrameId = 0;
+
+      if (token === refreshToken) {
+        createPanelMotion();
+      }
+    });
   };
 
   onMounted(() => {
+    if (!canUseWindow()) {
+      return;
+    }
+
+    mediaQuery = window.matchMedia(ENABLE_QUERY);
+
+    const handleMediaChange = () => {
+      scheduleCreate();
+    };
+
+    mediaQuery.addEventListener("change", handleMediaChange);
+    removeMediaListener = () => mediaQuery.removeEventListener("change", handleMediaChange);
+
     stopMotionWatch = watch(
       isMotionLite,
-      (liteMode) => {
-        if (liteMode) {
-          cleanupSectionMotion();
-          return;
-        }
-
-        scheduleSectionTimelines();
+      () => {
+        scheduleCreate();
       },
       { immediate: true }
     );
@@ -354,6 +222,7 @@ export function useSectionTransitionMotion() {
 
   onBeforeUnmount(() => {
     stopMotionWatch?.();
-    cleanupSectionMotion();
+    removeMediaListener?.();
+    cleanup();
   });
 }

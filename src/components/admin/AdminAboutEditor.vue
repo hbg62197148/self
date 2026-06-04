@@ -65,7 +65,7 @@ const removeFact = (index) => {
       <div class="admin-repeat-list">
         <div v-for="(paragraph, index) in model.paragraphs" :key="`paragraph-${index}`" class="admin-stack">
           <textarea v-model="model.paragraphs[index]" class="admin-textarea" rows="4"></textarea>
-          <button type="button" class="admin-remove" @click="removeParagraph(index)">删除段落</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeParagraph(index)">删除段落</button>
         </div>
       </div>
     </div>
@@ -100,7 +100,7 @@ const removeFact = (index) => {
               <input v-model="item.value" class="admin-input" type="text">
             </label>
           </div>
-          <button type="button" class="admin-remove" @click="removeFact(index)">删除信息</button>
+          <button type="button" class="admin-remove admin-spaced-action" @click="removeFact(index)">删除信息</button>
         </article>
       </div>
     </div>
