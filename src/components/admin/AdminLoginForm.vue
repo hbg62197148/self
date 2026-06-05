@@ -3,6 +3,7 @@ import { nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { RouterLink } from "vue-router";
 import { useMotionPreference } from "../../composables/useMotionPreference";
 import { gsap } from "../../lib/gsap";
+import AdminLoginCharacters from "./AdminLoginCharacters.vue";
 
 const props = defineProps({
   submitting: {
@@ -29,6 +30,7 @@ const localError = ref("");
 const authShellRef = ref(null);
 const loginCardRef = ref(null);
 const submitButtonRef = ref(null);
+const showPassword = ref(false);
 const { isMotionLite } = useMotionPreference();
 
 let motionContext = null;
@@ -131,7 +133,9 @@ const playEntrance = () => {
   motionContext?.revert();
   motionContext = gsap.context(() => {
     if (isMotionLite.value) {
-      gsap.set([".admin-login-card", ".admin-login-field", ".admin-auth-bg", ".admin-auth-scan"], { clearProps: "all" });
+      gsap.set([".admin-login-card", ".admin-login-field", ".admin-login-visual", ".admin-auth-bg", ".admin-auth-scan"], {
+        clearProps: "all"
+      });
       return;
     }
 
@@ -154,6 +158,17 @@ const playEntrance = () => {
           ease: "power2.out"
         },
         "-=0.38"
+      )
+      .from(
+        ".admin-login-visual",
+        {
+          x: 30,
+          opacity: 0,
+          scale: 0.98,
+          duration: 0.62,
+          ease: "power2.out"
+        },
+        "-=0.58"
       );
 
     gsap.to(".admin-auth-bg", {
@@ -210,6 +225,10 @@ const submitLogin = () => {
   });
 };
 
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
+
 watch(
   () => props.submitting,
   (isSubmitting) => {
@@ -249,58 +268,85 @@ defineExpose({
       <span class="admin-auth-scan"></span>
     </div>
 
-    <article ref="loginCardRef" class="admin-login-card panel">
-      <div class="admin-login-copy admin-login-field">
-        <p class="admin-kicker">Content Admin</p>
-        <h1>后台登录</h1>
-        <p class="admin-subtitle">输入正确的账号和密码后，才能进入内容管理后台。</p>
-      </div>
-
-      <form class="admin-login-form" @submit.prevent="submitLogin">
-        <label class="admin-field admin-login-field">
-          <span>账号</span>
-          <input
-            v-model="credentials.username"
-            class="admin-input"
-            type="text"
-            autocomplete="username"
-            placeholder="请输入后台账号"
-          >
-        </label>
-
-        <label class="admin-field admin-login-field">
-          <span>密码</span>
-          <input
-            v-model="credentials.password"
-            class="admin-input"
-            type="password"
-            autocomplete="current-password"
-            placeholder="请输入后台密码"
-          >
-        </label>
-
-        <p v-if="localError || errorMessage" class="admin-feedback is-error admin-login-field">
-          {{ localError || errorMessage }}
-        </p>
-
-        <p v-else-if="noticeMessage" class="admin-feedback is-success admin-login-field">
-          {{ noticeMessage }}
-        </p>
-
-        <div class="admin-toolbar admin-login-field">
-          <button
-            ref="submitButtonRef"
-            type="submit"
-            class="button button-primary admin-login-button"
-            :class="{ 'is-submitting': submitting }"
-            :disabled="submitting"
-          >
-            {{ submitting ? "登录中..." : "登录后台" }}
-          </button>
-          <RouterLink class="button button-secondary" to="/">返回前台</RouterLink>
+    <div class="admin-login-layout">
+      <aside class="admin-login-visual panel" aria-hidden="true">
+        <div class="admin-login-visual-copy">
+          <p class="admin-kicker">Admin Console</p>
+          <h2>管理内容前，先通过身份校验。</h2>
         </div>
-      </form>
-    </article>
+
+        <div class="admin-login-character-stage">
+          <AdminLoginCharacters
+            :show-password="showPassword"
+            :password-length="credentials.password.length"
+          />
+        </div>
+      </aside>
+
+      <article ref="loginCardRef" class="admin-login-card panel">
+        <div class="admin-login-copy admin-login-field">
+          <p class="admin-kicker">Content Admin</p>
+          <h1>后台登录</h1>
+          <p class="admin-subtitle">输入正确的账号和密码后，才能进入内容管理后台。</p>
+        </div>
+
+        <form class="admin-login-form" @submit.prevent="submitLogin">
+          <label class="admin-field admin-login-field">
+            <span>账号</span>
+            <input
+              v-model="credentials.username"
+              class="admin-input"
+              type="text"
+              autocomplete="username"
+              placeholder="请输入后台账号"
+            >
+          </label>
+
+          <label class="admin-field admin-login-field">
+            <span>密码</span>
+            <div class="admin-password-control">
+              <input
+                v-model="credentials.password"
+                class="admin-input admin-password-input"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="current-password"
+                placeholder="请输入后台密码"
+              >
+              <button
+                type="button"
+                class="admin-password-toggle"
+                :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+                @mousedown.prevent
+                @click="togglePasswordVisibility"
+              >
+                {{ showPassword ? "隐藏" : "显示" }}
+              </button>
+            </div>
+          </label>
+
+          <p v-if="localError || errorMessage" class="admin-feedback is-error admin-login-field">
+            {{ localError || errorMessage }}
+          </p>
+
+          <p v-else-if="noticeMessage" class="admin-feedback is-success admin-login-field">
+            {{ noticeMessage }}
+          </p>
+
+          <div class="admin-toolbar admin-login-field">
+            <button
+              ref="submitButtonRef"
+              type="submit"
+              class="button button-primary admin-login-button"
+              :class="{ 'is-submitting': submitting }"
+              :disabled="submitting"
+            >
+              {{ submitting ? "登录中..." : "登录后台" }}
+            </button>
+            <RouterLink class="button button-secondary" to="/">返回前台</RouterLink>
+          </div>
+        </form>
+      </article>
+    </div>
   </div>
 </template>
 
@@ -308,8 +354,11 @@ defineExpose({
 .admin-auth-shell--motion {
   position: relative;
   isolation: isolate;
+  width: min(1120px, calc(100vw - 24px));
+  min-height: calc(100vh - 46px);
   overflow: hidden;
   padding: clamp(18px, 4vw, 32px) 0;
+  place-items: center;
 }
 
 .admin-auth-bg {
@@ -349,8 +398,109 @@ defineExpose({
 .admin-login-card {
   position: relative;
   z-index: 1;
+  align-content: center;
+  min-height: 560px;
   transform-origin: 50% 50%;
   will-change: transform, opacity, filter;
+}
+
+.admin-login-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(320px, 0.78fr);
+  gap: 18px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.admin-login-visual {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: space-between;
+  gap: 22px;
+  min-height: 560px;
+  padding: clamp(24px, 4vw, 34px) clamp(18px, 3vw, 30px) 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 8%, rgba(123, 247, 212, 0.18), transparent 30%),
+    radial-gradient(circle at 84% 22%, rgba(158, 169, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018)),
+    var(--surface);
+  will-change: transform, opacity;
+}
+
+.admin-login-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.88), transparent 82%);
+  pointer-events: none;
+}
+
+.admin-login-visual-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 10px;
+  max-width: 430px;
+}
+
+.admin-login-visual-copy h2 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4.2rem);
+  line-height: 0.96;
+}
+
+.admin-login-visual-copy p:last-child {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.admin-login-character-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 430px;
+  margin: 0 -18px;
+  overflow: hidden;
+}
+
+.admin-password-control {
+  position: relative;
+}
+
+.admin-password-input {
+  padding-right: 76px;
+}
+
+.admin-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-size: 0.8rem;
+  transform: translateY(-50%);
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.admin-password-toggle:hover {
+  color: var(--text);
+  border-color: rgba(255, 106, 61, 0.32);
+  background: rgba(255, 106, 61, 0.1);
 }
 
 .admin-login-field,
@@ -399,6 +549,24 @@ html.motion-lite .admin-login-button.is-submitting::after {
 
   .admin-auth-bg {
     inset: 8px -28%;
+  }
+}
+
+@media (max-width: 980px) {
+  .admin-auth-shell--motion {
+    width: min(680px, calc(100vw - 20px));
+  }
+
+  .admin-login-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-login-card {
+    min-height: auto;
+  }
+
+  .admin-login-visual {
+    display: none;
   }
 }
 </style>
